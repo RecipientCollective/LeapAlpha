@@ -273,7 +273,7 @@ void ofApp::handsControlSketch1()
                 //ropeVec[j]->b = simpleHands[0].handPos;
             }
         }
-        //BOTH HANDS
+        //BOTH HANDS Prova di modifica
         else if(simpleHands.size()==2)//&&handsDistance<=ropeVec[j]->WireLength)
         {
             if (simpleHands[0].isLeft) {

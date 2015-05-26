@@ -1,0 +1,30 @@
+26-05-15
+Changelog: 
+	- Modificato ofxLeapMotion2: 
+		nel costruttore della classe ofxLeapSimpleHands ho aggiunto la palmVelocity: 
+		ofxLeapMotion2.h line 298:’curHand.palmVel = getofPoint(leapHands[i].palmVelocity());’  [e relativa definizione]
+	- Primo Sketch di controllo con le mani. (cavi ancora da animare)
+	- Pulizia del codice (rimossi residui del merge e riorganizzazione)
+
+To Do:
+	- Mapping Fisso (occorre avere un Pepper box dalle dimensioni definitive,
+	 il lavoro sul prototipo prosegue bene…)
+	- Funzioni autorilevamento mano dx e sx.
+	- Le forze che agiscono sulle corde sono invertite(???)
+	- Scaling velocity (velocity->addforce).
+	- Sketch: vari con cavi (Marsiglia)
+	- Sketch: mesh distortion 
+	- Sketch: swarm di particelle repulse dalle mani
+	- Valutare di acquisire le mani con getHands() , al posto delle simplehands, o anche di estendere il wrapper ad altre funzioni dell sdk del leap.
+	
+____________________________________________________________________________________
+24-05-15
+Changelog:
+
+	- Sostituita interamente OFXGUI con OFXUI
+	- Eliminato test Sfere
+	- Aggiunta classe Rope e test con cavi collegati tra le due mani
+	- Le linee dell'interfaccia sono più sottili.
+
+Per far funzionare il progetto occorre aggiungere OFXUI e OFXXMLSETTINGS
+

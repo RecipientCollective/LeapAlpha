@@ -20,11 +20,13 @@ void Swarm::update()
 
 void Swarm::draw()
 {
+    ofPushStyle();
     int i;
     for(i = 0; i < boids.size(); i++)
     {
         boids[i].draw();
     }
+    ofPopStyle();
 }
 
 void Swarm::addBoid() {

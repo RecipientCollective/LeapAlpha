@@ -4,6 +4,10 @@
 #include "ofxOsc.h"
 #include "ofxLeapMotion2.h"
 #include "Grid.h"
+#include "Swarm.h"
+
+#define START_COUNT 300
+#define MAX_DISTANCE 100.0f
 
 class ofApp : public ofBaseApp{
 
@@ -38,7 +42,6 @@ class ofApp : public ofBaseApp{
     
     
     //GUI
-        ofxUISuperCanvas *guiRopes;
         ofxUISuperCanvas *guiLeap;
         bool bShowGui;
         bool bShowHelp;
@@ -71,4 +74,12 @@ class ofApp : public ofBaseApp{
         void setLeapMapping();
         void guiSetup();
         void LeapUpdate();
+
+    // SWARM
+        int startCount;
+        float maxDistance;
+        Swarm swarm;
+        ofPoint avoidPoint;
+        bool avoid;
+        void swarmSetup();
 };

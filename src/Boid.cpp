@@ -5,9 +5,9 @@ Boid::Boid()
     loc.set(ofRandomWidth(),ofRandomHeight());
 	vel.set(0,0);
 	acc.set(0,0);
-    r = 3.0;
-    maxspeed = 1.0;
-    maxforce = 0.1;
+    r = BOID_RADIUS;
+    maxspeed = MAX_BOID_SPEED;
+    maxforce = MAX_BOID_FORCE;
 }
 
 Boid::Boid(int x, int y)
@@ -15,9 +15,9 @@ Boid::Boid(int x, int y)
     loc.set(x,y);
 	vel.set(0,0);
 	acc.set(0,0);
-    r = 3.0;
-    maxspeed = 1.0;
-    maxforce = 0.1;
+    r = BOID_RADIUS;
+    maxspeed = MAX_BOID_SPEED;
+    maxforce = MAX_BOID_FORCE;
 }
 
 // Method to update location

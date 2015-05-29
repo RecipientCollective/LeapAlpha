@@ -29,15 +29,16 @@ void ofApp::setup()
     box.set(ofGetWidth(), ofGetHeight(), outputZrange*2);
     box.setPosition(0.0f, 0.0f, 0.0f);
     
+    swarmSetup();
 }
 
 //--------------------------------------------------------------
 void ofApp::update()
 {
-    
     //Update Leap Motion Datas
     LeapUpdate();
-    
+    // Update swarm
+    swarm.update();
 }
 
 //--------------------------------------------------------------
@@ -47,6 +48,7 @@ void ofApp::draw()
     glEnable(GL_NORMALIZE);
     ofBackground(0, 0, 0);
     
+    ofPushMatrix();
     cam.begin();
     
     // FPS BAR
@@ -84,6 +86,7 @@ void ofApp::draw()
     //Draw Hands
     if (debugDraw)
     {
+        ofPushStyle();
         for(int i = 0; i < simpleHands.size(); i++)
         {
             //simpleHands[0].debugDraw();
@@ -115,6 +118,7 @@ void ofApp::draw()
                 ofLine(dip.x, dip.y, dip.z, tip.x, tip.y, tip.z);
             }
         }
+        ofPopStyle();
     }
     
     // draw center point: if dot < 0 hands are facing
@@ -123,18 +127,21 @@ void ofApp::draw()
         ofPoint center = simpleHands[0].handPos.getMiddle(simpleHands[1].handPos);
         if (debugDraw)
         {
+            ofPushStyle();
             ofSetColor(255, 0, 0);
             ofDrawSphere(center.x, center.y, center.z, 5);
+            ofPopStyle();
         }
         ofLogNotice() << "FACING HANDS: " << simpleHands[0].handNormal.dot(simpleHands[1].handNormal) << "CENTER: " << center;
     }
     
     cam.end();
+    ofPopMatrix();
     
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_NORMALIZE);
 
-    // print help
+    // 2D MODE
     if (bShowHelp)
     {
         string msg = string("Using mouse inputs to navigate (press 'c' to toggle): ") + (cam.getMouseInputEnabled() ? "YES" : "NO");
@@ -156,6 +163,9 @@ void ofApp::draw()
     {
         drawInteractionArea();
     }
+    
+    // SWARM
+    swarm.draw();
 }
 
 void ofApp::LeapUpdate()
@@ -234,6 +244,7 @@ void ofApp::keyPressed(int key)
         case 'G':
         case 'g':
             bShowGui = !bShowGui;
+            guiLeap->setVisible(bShowGui);
             break;
         case 'F':
         case 'f':
@@ -286,7 +297,6 @@ void ofApp::windowResized(int w, int h)
     slider->setMax(ofGetHeight()/2);
     slider = (ofxUISlider*) guiLeap->getWidget("WorkArea max Y");
     slider->setMax(ofGetHeight());
-    guiRopes->setPosition(ofGetWidth()-210,0);
     box.set(ofGetWidth(), ofGetHeight(), outputZrange*2);
 }
 
@@ -462,6 +472,23 @@ void ofApp::guiSetup()
     leapYmin = 90;
     leapYmax = 490;
 }
+
+//--------------------------------------------------------------
+void ofApp::swarmSetup()
+{
+    avoidPoint = ofPoint(0.0,0.0);
+    avoid = false;
+    
+    startCount = START_COUNT;
+    maxDistance = MAX_DISTANCE;
+    
+    for (int i = 0; i < startCount; i++)
+    {
+        swarm.addBoid();
+    }
+
+}
+
 //--------------------------------------------------------------
 void ofApp::exit()
 {

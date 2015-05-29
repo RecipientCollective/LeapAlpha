@@ -2,7 +2,10 @@
 #define BOID_H
 
 #include "ofMain.h"
-//#include "ofxVectorMath.h"
+
+#define MAX_BOID_SPEED 1.0f;
+#define MAX_BOID_FORCE 0.1f;
+#define BOID_RADIUS 3.0f
 
 class Boid {
 public:

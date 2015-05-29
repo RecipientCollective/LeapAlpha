@@ -70,8 +70,8 @@ ofVec2f Boid::steer(ofVec2f target, bool slowdown)
 		
 		desired /= d; // Normalize desired
 		// Two options for desired vector magnitude (1 -- based on distance, 2 -- maxspeed)
-		if ((slowdown) && (d < 100.0f)) {
-			desired *= maxspeed * (d/100.0f); // This damping is somewhat arbitrary
+		if ((slowdown) && (d < SLOW_DOWN_DISTANCE)) {
+			desired *= maxspeed * (d/SLOW_DOWN_DISTANCE); // This damping is somewhat arbitrary
 		} else {
 			desired *= maxspeed;
 		}
@@ -112,9 +112,9 @@ void Boid::flock(vector<Boid> &boids)
 	ofVec2f coh = cohesion(boids);
 	
 	// Arbitrarily weight these forces
-	sep *= 1.5;
-	ali *= 1.0;
-	coh *= 1.0;
+	sep *= BOID_SEP_WEIGHT;
+	ali *= BOID_ALI_WEIGHT;
+	coh *= BOID_COH_WEIGHT;
 	
 	acc += sep + ali + coh;
 }
@@ -125,7 +125,7 @@ void Boid::flock(vector<Boid> &boids)
 bool Boid::isHit(int x, int y, int radius)
 {
     int r = 1;
-    int range = 50;//calculation error range
+    int range = BOID_IS_HIT_ERROR;//calculation error range
     int dist =r + radius - range;
     if(pow((x-loc.x),2)+pow((y-loc.y),2) < dist * dist) {
         return true;
@@ -137,7 +137,7 @@ bool Boid::isHit(int x, int y, int radius)
 // Method checks for nearby boids and steers away
 ofVec2f Boid::separate(vector<Boid> &boids)
 {
-    float desiredseparation = 25.0f;
+    float desiredseparation = BOID_SEPARATION;
     ofVec2f steer;
     int count = 0;
 	
@@ -186,7 +186,7 @@ ofVec2f Boid::separate(vector<Boid> &boids)
 // For every nearby boid in the system, calculate the average velocity
 ofVec2f Boid::align(vector<Boid> &boids)
 {
-    float neighbordist = 50.0;
+    float neighbordist = BOID_NEIGHBOUR_DIST;
     ofVec2f steer;
     int count = 0;
     for (int i = 0 ; i < boids.size(); i++)
@@ -224,7 +224,7 @@ ofVec2f Boid::align(vector<Boid> &boids)
 // For the average location (i.e. center) of all nearby boids, calculate steering vector towards that location
 ofVec2f Boid::cohesion(vector<Boid> &boids)
 {
-    float neighbordist = 50.0;
+    float neighbordist = BOID_NEIGHBOUR_DIST;
     ofVec2f sum;   // Start with empty vector to accumulate all locations
     int count = 0;
     for (int i = 0 ; i < boids.size(); i++)

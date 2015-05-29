@@ -19,6 +19,7 @@ public:
     void draw();
     void addBoid();
     void addBoid(int x, int y);
+    void clear();
     void removeBoid(int x, int y, int radius);
     int swarmSize();
     

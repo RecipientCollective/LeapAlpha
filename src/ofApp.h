@@ -8,6 +8,7 @@
 
 #define START_COUNT 300
 #define MAX_DISTANCE 100.0f
+#define ERASE_RADIUS 30.0f
 
 class ofApp : public ofBaseApp{
 
@@ -45,8 +46,6 @@ class ofApp : public ofBaseApp{
         ofxUISuperCanvas *guiLeap;
         bool bShowGui;
         bool bShowHelp;
-
-        string guiTitle;
         bool debugDraw;
         bool bShowOrigin;
         bool bShowGridYZ;
@@ -61,7 +60,9 @@ class ofApp : public ofBaseApp{
         float leapYmax;
         float outputZrange;
         bool bShowWorkingArea;
-            
+    
+        ofxUISuperCanvas *guiSwarm;
+    
     // GUI EVENTS
         void guiEvent(ofxUIEventArgs &e);
 
@@ -80,6 +81,11 @@ class ofApp : public ofBaseApp{
         float maxDistance;
         Swarm swarm;
         ofPoint avoidPoint;
+        bool bMouseAvoid;
         bool avoid;
         void swarmSetup();
+        bool bSwarmErase;
+        bool eraseMode;
+        float avoidZthreshold;
+        ofPoint erasePoint;
 };

@@ -37,7 +37,19 @@ void ofApp::update()
 {
     //Update Leap Motion Datas
     LeapUpdate();
+
     // Update swarm
+    if (avoid)
+    {
+        for (int i = 0; i<swarm.swarmSize(); i++)
+        {
+            ofVec2f dist = swarm.boids[i].loc - avoidPoint;
+            if (dist.lengthSquared() < (maxDistance*maxDistance) )
+            {
+                swarm.boids[i].avoid(avoidPoint);
+            }
+        }
+    }
     swarm.update();
 }
 
@@ -65,17 +77,19 @@ void ofApp::draw()
     {
         ofDrawAxis(100);
     }
-    if (bShowWorkingArea)
-    {
-        ofSetColor(0, 255, 0);
-        box.drawWireframe();
-    }
     
     nodeGrid.customDraw(bShowGridLabels,bShowGridXY, bShowGridYZ, bShowGridXZ);
     
-    //////////////////////////////////////////////////////////
-    //PushMatrix (Hands and Ropes)
-    ofPushMatrix();
+    if (bShowWorkingArea)
+    {
+        ofPushMatrix();
+        ofPushStyle();
+        ofSetColor(0, 255, 0);
+        box.drawWireframe();
+        ofPopStyle();
+        ofPopMatrix();
+    }
+    
     if (bMirrorImage)
     {
         ofScale(-1,1,1);
@@ -165,6 +179,26 @@ void ofApp::draw()
     }
     
     // SWARM
+    if (eraseMode)
+    {
+        ofPushStyle();
+        ofSetColor(255,0,0);
+        ofCircle(erasePoint,4.0f);
+        ofNoFill();
+        ofCircle(erasePoint, ERASE_RADIUS);
+        ofPopStyle();
+    }
+    
+    if (avoid)
+    {
+        ofPushStyle();
+        ofSetColor(255,0,0);
+        ofCircle(avoidPoint,4.0f);
+        ofNoFill();
+        ofCircle(avoidPoint, maxDistance);
+        ofPopStyle();
+    }
+    
     swarm.draw();
 }
 
@@ -174,11 +208,15 @@ void ofApp::LeapUpdate()
     fingersFound.clear();
     fingerType fingerTypes[] = {THUMB, INDEX, MIDDLE, RING, PINKY};
     simpleHands = leap.getSimpleHands();
-    if(leap.isFrameNew() && simpleHands.size() ){
+    
+    if(leap.isFrameNew() && simpleHands.size() )
+    {
         
         //Hands Distance
         if (simpleHands.size()>1)
-        handsDistance = simpleHands[0].handPos.distance(simpleHands[1].handPos);
+        {
+            handsDistance = simpleHands[0].handPos.distance(simpleHands[1].handPos);
+        }
         
         //Hands Vel
         cout<<"L: "<<simpleHands[0].palmVel<< endl;
@@ -197,7 +235,28 @@ void ofApp::LeapUpdate()
                 fingersFound.push_back(id);
             }
         }
+        
+        // get first hand index fingertip for swarm avoid
+        ofPoint index_tip = simpleHands[0].fingers[ fingerTypes[1] ].tip;
+        
+        // z is negative in front of leap
+        if (index_tip.z < 0 && index_tip.z <= avoidZthreshold)
+        {
+            avoid = true;
+            ofVec3f wp = cam.worldToScreen(index_tip);
+            avoidPoint.set(wp.x, wp.y);
+        }
+        else
+        {
+            avoid = false;
+        }
     }
+    
+    if (simpleHands.empty())
+    {
+        avoid = false;
+    }
+    
     //IMPORTANT! - tell ofxLeapMotion that the frame is no longer new.
     leap.markFrameAsOld();
 }
@@ -269,18 +328,50 @@ void ofApp::mouseMoved(int x, int y ){
 }
 
 //--------------------------------------------------------------
-void ofApp::mouseDragged(int x, int y, int button){
-
+void ofApp::mouseDragged(int x, int y, int button)
+{
+    if (bSwarmErase && button == 0)
+    {
+        eraseMode = true;
+        erasePoint.set(x,y);
+        swarm.removeBoid(x, y, ERASE_RADIUS);
+    }
+    else if (bMouseAvoid && button == 0)
+    {
+        avoid = true;
+        avoidPoint.set(x,y);
+    }
 }
 
 //--------------------------------------------------------------
-void ofApp::mousePressed(int x, int y, int button){
-
+void ofApp::mousePressed(int x, int y, int button)
+{
+    if (bSwarmErase && button == 0)
+    {
+        eraseMode = true;
+        erasePoint.set(x,y);
+        swarm.removeBoid(x, y, ERASE_RADIUS);
+    }
+    else if (bMouseAvoid && button == 0)
+    {
+        avoid = true;
+        avoidPoint.set(x,y);
+    }
 }
 
 //--------------------------------------------------------------
-void ofApp::mouseReleased(int x, int y, int button){
-
+void ofApp::mouseReleased(int x, int y, int button)
+{
+    if (bSwarmErase && button == 0)
+    {
+        eraseMode = false;
+        erasePoint.set(0.0f,0.0f);
+    }
+    else if (bMouseAvoid && button == 0)
+    {
+        avoid = false;
+        avoidPoint.set(0.0f,0.0f);
+    }
 }
 
 //--------------------------------------------------------------
@@ -298,6 +389,7 @@ void ofApp::windowResized(int w, int h)
     slider = (ofxUISlider*) guiLeap->getWidget("WorkArea max Y");
     slider->setMax(ofGetHeight());
     box.set(ofGetWidth(), ofGetHeight(), outputZrange*2);
+    guiSwarm->setPosition(ofGetWidth()-210,10);
 }
 
 //--------------------------------------------------------------
@@ -378,6 +470,10 @@ void ofApp::guiEvent(ofxUIEventArgs &e)
         //outputZrange = slider->getValue();
         ofxUISlider *sliderWAreaX = (ofxUISlider *)guiLeap->getWidget("WorkArea Z range");
         sliderWAreaX->setMax(outputZrange);
+        
+        ofxUISlider *sliderZavoid = (ofxUISlider *)guiSwarm->getWidget("AVOID Z THRESHOLD");
+        sliderZavoid->setMax(outputZrange);
+        
         if (bSetMapping)
         {
             leap.setMappingZ(-outputZrange, outputZrange, -outputZrange, outputZrange);
@@ -421,6 +517,9 @@ void ofApp::guiEvent(ofxUIEventArgs &e)
         {
             leap.setMappingY(leapYmin, leapYmax, -ofGetHeight()/2, ofGetHeight()/2);
         }
+    }
+    else if (name == "REINIT SWARM") {
+        swarmSetup();
     }
 }
 void ofApp::guiSetup()
@@ -471,16 +570,35 @@ void ofApp::guiSetup()
     leapZrange = 150;
     leapYmin = 90;
     leapYmax = 490;
+    
+    // SWARM DEFAULT OPTIONS
+    avoidPoint = ofPoint(0.0,0.0);
+    avoid = false;
+    startCount = START_COUNT;
+    maxDistance = MAX_DISTANCE;
+    bSwarmErase = false;
+    bMouseAvoid = false;
+    eraseMode = false;
+    erasePoint = ofPoint(0.0,0.0);
+    avoidZthreshold = 0.0f; // position in z to start avoid
+    
+    // GUI SWARM
+    guiSwarm = new ofxUISuperCanvas("Swarm : " );
+    guiSwarm->setPosition(ofGetWidth()-210,10);
+    guiSwarm->addButton("REINIT SWARM", false);
+    guiSwarm->addIntSlider("BOIDS", 1, 1000, &startCount);
+    guiSwarm->addSlider("AVOID AREA", 1, 1000, &maxDistance);
+    guiSwarm->addToggle("ERASE MODE", &bSwarmErase);
+    guiSwarm->addToggle("MOUSE AVOID", &bMouseAvoid);
+    guiSwarm->addSlider("AVOID Z THRESHOLD", 0, outputZrange, &avoidZthreshold);
+    guiSwarm->autoSizeToFitWidgets();
+    ofAddListener(guiSwarm->newGUIEvent,this,&ofApp::guiEvent);//event listener
 }
 
 //--------------------------------------------------------------
 void ofApp::swarmSetup()
 {
-    avoidPoint = ofPoint(0.0,0.0);
-    avoid = false;
-    
-    startCount = START_COUNT;
-    maxDistance = MAX_DISTANCE;
+    swarm.clear();
     
     for (int i = 0; i < startCount; i++)
     {

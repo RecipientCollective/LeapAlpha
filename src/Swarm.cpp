@@ -46,6 +46,11 @@ void Swarm::removeBoid(int x, int y, int radius) {
     }
 }
 
+void Swarm::clear()
+{
+    boids.clear();
+}
+
 int Swarm::swarmSize() {
     return boids.size();
 }

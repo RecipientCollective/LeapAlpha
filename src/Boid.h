@@ -3,9 +3,16 @@
 
 #include "ofMain.h"
 
-#define MAX_BOID_SPEED 1.0f;
-#define MAX_BOID_FORCE 0.1f;
+#define MAX_BOID_SPEED 1.0f
+#define MAX_BOID_FORCE 0.1f
 #define BOID_RADIUS 3.0f
+#define BOID_SEPARATION 25.0f
+#define SLOW_DOWN_DISTANCE 100.0f
+#define BOID_SEP_WEIGHT 1.5f
+#define BOID_ALI_WEIGHT 1.0f
+#define BOID_COH_WEIGHT 1.0f
+#define BOID_NEIGHBOUR_DIST 50.0f
+#define BOID_IS_HIT_ERROR 5.0f;
 
 class Boid {
 public:

@@ -1,22 +1,5 @@
 #include "ofApp.h"
-#include <Poco/Path.h>
 
-ofPoint mouseisHere;
-float bSmooth;
-float p_mass;
-float p_drag;
-float sp_k;
-bool VisCtrlPoints;
-int nPoints;
-bool handsSketch_1;
-bool handsSketch_2;
-bool handsSketch_3;
-bool handsSketch_4;
-bool handsSketch_5;
-bool handsSketch_6;
-bool handsSketch_7;
-ofPoint velocityL;
-ofPoint velocityR;
 
 //SETUP
 //--------------------------------------------------------------
@@ -28,8 +11,6 @@ void ofApp::setup()
     ofEnableAlphaBlending();
     ofEnableSmoothing();
     ofNoFill();
-    
-    VisCtrlPoints = 0;
     
 #ifdef DEBUG
     ofSetLogLevel(OF_LOG_NOTICE);
@@ -48,44 +29,17 @@ void ofApp::setup()
     box.set(ofGetWidth(), ofGetHeight(), outputZrange*2);
     box.setPosition(0.0f, 0.0f, 0.0f);
     
-    // Add Group of Ropes
-    ropeVec = new Rope*[Rgroup_1];
-    int ropesLenght = 200;
-    for(int i=0; i<Rgroup_1; i++)
-    {
-        addRope(ropeVec,new Rope(ofPoint(300,200,0),ofPoint(300,500,0),40,ropesLenght,ofPoint(0,0,0),0.01f,true),i,Rgroup_1);
-    }
 }
 
 //--------------------------------------------------------------
 void ofApp::update()
 {
-    //Update Ropes A and B Position
-    for (int j=0;j<Rgroup_1;j++)
-    {
-        ropeVec[j]->update();
-    }
     
     //Update Leap Motion Datas
     LeapUpdate();
     
-    //HANDS CONTROL SKETCH #1
-    if (handsSketch_1)
-    {
-        handsControlSketch1();
-    }
-    
-    //Mouse Follow (Ropes Point B)
-    else if (MouseFollow)
-    {
-        mouseisHere = ofPoint(ofGetMouseX(),ofGetMouseY(),0);
-        for (int  i = 0;i<Rgroup_1;i++)
-        {
-            //ropeVec[i]->smoothMoveB=0.06f;
-            ropeVec[i]->b = mouseisHere;
-        }
-    }
 }
+
 //--------------------------------------------------------------
 void ofApp::draw()
 {
@@ -175,17 +129,6 @@ void ofApp::draw()
         ofLogNotice() << "FACING HANDS: " << simpleHands[0].handNormal.dot(simpleHands[1].handNormal) << "CENTER: " << center;
     }
     
-    
-    //////////////////////////////////////////////////////////
-    //Draw Ropes
-    ofSetLineWidth(0.9f);
-    for (int j=0;j<Rgroup_1;j++)
-    {
-        ropeVec[j]->draw();
-    }
-    //PopMatrix(Hands and Ropes)
-    ofPopMatrix();
-    
     cam.end();
     
     glDisable(GL_DEPTH_TEST);
@@ -249,58 +192,6 @@ void ofApp::LeapUpdate()
     leap.markFrameAsOld();
 }
 
-//handsControlSketch1
-//--------------------------------------------------------------
-void ofApp::handsControlSketch1()
-{
-    //Update Ropes A and B Position
-    for (int j=0;j<Rgroup_1;j++)
-    {
-        float randomOffSet = ofRandom(40)-20;
-        //Assign Hands to A & B
-        if (simpleHands.size()==1)
-        {
-            //LeftHand
-            if (simpleHands[0].isLeft)//&&simpleHands[0].handPos.distance(ropeVec[j]->b)<=ropeVec[j]->WireLength)
-            {
-                ropeVec[j]->a.interpolate(simpleHands[0].handPos+randomOffSet,0.1);
-                //ropeVec[j]->a = simpleHands[0].handPos;
-            }
-            //RightHand
-            else if(!simpleHands[0].isLeft)//&&simpleHands[0].handPos.distance(ropeVec[j]->a)<=ropeVec[j]->WireLength)
-            {
-                ropeVec[j]->b.interpolate(simpleHands[0].handPos+randomOffSet,0.1);
-                //ropeVec[j]->b = simpleHands[0].handPos;
-            }
-        }
-        //BOTH HANDS Prova di modifica
-        else if(simpleHands.size()==2)//&&handsDistance<=ropeVec[j]->WireLength)
-        {
-            if (simpleHands[0].isLeft) {
-                ropeVec[j]->a.interpolate(simpleHands[0].handPos+randomOffSet,0.1);
-                ropeVec[j]->b.interpolate(simpleHands[1].handPos+randomOffSet,0.1);
-//                ropeVec[j]->a = simpleHands[0].handPos;
-//                ropeVec[j]->b = simpleHands[1].handPos;
-            }
-            else
-            {
-                ropeVec[j]->b.interpolate(simpleHands[0].handPos+randomOffSet,0.1);
-                ropeVec[j]->a.interpolate(simpleHands[1].handPos+randomOffSet,0.1);
-                //ropeVec[j]->b = simpleHands[0].handPos;
-                //ropeVec[j]->a = simpleHands[1].handPos;
-            }
-        }
-    }
-}
-
-//ADDROPE Method
-//--------------------------------------------------------------
-int ofApp::addRope(Rope** ropesVector,Rope *nextRope,int startString,int endString){
-    int i = startString%endString;
-    ropesVector[i] = nextRope;
-}
-
-
 //Set Leap Re-Mapping
 //--------------------------------------------------------------
 void ofApp::setLeapMapping()
@@ -328,46 +219,13 @@ void ofApp::drawInteractionArea()
     glDepthMask(true);
     ofPopStyle();
 }
+
 //KEY PRESSED
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key)
 {
     switch (key)
     {
-        case '0': //MOUSEFOLLOW
-            MouseFollow = 1;
-            handsSketch_1 = 0;
-            break;
-        case '1'://HANDS SKETCH #1
-            MouseFollow = 0;
-            handsSketch_1 = 1;
-            break;
-        
-        case '2'://HANDS SKETCH #2
-            MouseFollow = 0;
-            handsSketch_1 = 0;
-            handsSketch_2 = 1;
-            break;
-
-        case '3'://HANDS SKETCH #3
-            MouseFollow = 0;
-            break;
-        
-        case '4'://HANDS SKETCH #4
-            MouseFollow = 0;
-            break;
-        
-        case '5'://HANDS SKETCH #5
-            MouseFollow = 0;
-            break;
-        
-        case '6'://HANDS SKETCH #6
-            MouseFollow = 0;
-            break;
-            
-        case '7'://HANDS SKETCH #7
-            break;
-            
         case 'C':
         case 'c':
             if(cam.getMouseInputEnabled()) cam.disableMouseInput();
@@ -449,112 +307,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e)
     string name = e.widget->getName();
     int kind = e.widget->getKind();
     
-    if(name == "X")
-    {
-        ofxUISlider *slider = (ofxUISlider *) e.widget;
-        for (int k = 0; k<Rgroup_1; k++)
-        {
-            ropeVec[k]->ForceX = slider->getScaledValue();
-        }
-    }
-    else if(name == "Y")
-    {
-        ofxUISlider *slider = (ofxUISlider *) e.widget;
-        for (int k = 0; k<Rgroup_1; k++)
-        {
-            ropeVec[k]->ForceY = slider->getScaledValue();
-        }
-    }
-    else if(name == "Z")
-    {
-        ofxUISlider *slider = (ofxUISlider *) e.widget;
-        for (int k = 0; k<Rgroup_1; k++)
-        {
-            ropeVec[k]->ForceZ = slider->getScaledValue();
-        }
-    }
-    else if (name == "Primitives")
-    {
-        ofxUIRadio *radio = (ofxUIRadio *) e.widget;
-        if (radio->getValue() == 0)
-        {
-            for (int k = 0; k<Rgroup_1; k++)
-            {
-                ropeVec[k]->ropeMesh.setMode(OF_PRIMITIVE_POINTS);
-            }
-        }
-        else if (radio->getValue() == 1)
-        {
-            for (int k = 0; k<Rgroup_1; k++)
-            {
-                ropeVec[k]->ropeMesh.setMode(OF_PRIMITIVE_LINE_STRIP);
-            }
-            
-        }
-    }
-    else if (name == "PolyLine-Mesh")
-    {
-        ofxUIRadio *radio = (ofxUIRadio *) e.widget;
-        if (radio->getValue() == 0)
-        {
-            for (int k = 0; k<Rgroup_1; k++) {
-                ropeVec[k]->meshRender = true;
-            }
-        }
-        else if (radio->getValue() == 1)
-        {
-            for (int k = 0; k<Rgroup_1; k++)
-            {
-                ropeVec[k]->meshRender = false;
-            }
-        }
-    }
-    else if (name == "B_smoothing")
-    {
-        ofxUISlider *slider = (ofxUISlider *) e.widget;
-        for (int i=0;i < Rgroup_1; i++)
-        {
-            ropeVec[i]->smoothMoveA = slider->getValue();
-            ropeVec[i]->smoothMoveB = slider->getValue();
-        }
-    }
-    else if (name == "Particle_Mass")
-    {
-        ofxUISlider *slider = (ofxUISlider *) e.widget;
-        for (int i=0;i < Rgroup_1; i++)
-        {
-            for (int k = 1; k<ropeVec[i]->ps.size()-1;k++)
-                ropeVec[i]->ps[k].mass = slider->getValue();
-        }
-    }
-    else if (name == "Particle_Drag")
-    {
-        ofxUISlider *slider = (ofxUISlider *) e.widget;
-        for (int i=0;i < Rgroup_1; i++)
-        {
-            for (int k =1; k<ropeVec[i]->ps.size()-1;k++)
-                ropeVec[i]->ps[k].drag = slider->getValue();
-        }
-    }
-    else if (name == "Spring_k")
-    {
-        ofxUISlider *slider = (ofxUISlider *) e.widget;
-        for (int i = 0;i < Rgroup_1; i++)
-        {
-            for (int k=0; k<ropeVec[i]->sp.size();k++)
-                ropeVec[i]->sp[k].k = slider->getValue();
-        }
-    }
-    else if (name == "Ctrl_Points")
-    {
-        for (int  i=0;i<Rgroup_1;i++)
-        {
-            ropeVec[i]->ropeMesh.clear();
-            ropeVec[i]->CtrlPointsVisible = VisCtrlPoints;
-            ropeVec[i]->meshSetup();
-        }
-    }
-    else if (name == "Debug Draw Hands")
+    if (name == "Debug Draw Hands")
     {
         ofxUIToggle *toggle = (ofxUIToggle *) e.widget;
         debugDraw = toggle->getValue();
@@ -693,40 +446,6 @@ void ofApp::guiSetup()
     guiLeap->addLabel("Press 'H' for Help");
     guiLeap->autoSizeToFitWidgets();
     ofAddListener(guiLeap->newGUIEvent,this,&ofApp::guiEvent);//event listener
-    
-    guiRopes = new ofxUISuperCanvas("Ropes");
-    guiRopes->setPosition(ofGetWidth()-210,0);
-    guiRopes->addSpacer();
-    guiRopes->addLabel("Forces", OFX_UI_FONT_MEDIUM);
-    guiRopes->addSpacer();
-    guiRopes->addSlider("X", -1.0f, 1.0f, GUIForceX);
-    guiRopes->addSlider("Y", -1.0f, 1.0f, GUIForceY);
-    guiRopes->addSlider("Z", -1.0f, 1.0f, GUIForceZ);
-    guiRopes->addSpacer();
-    vector<string> PrimNames;
-    PrimNames.push_back("Points");
-    PrimNames.push_back("Lines");
-    guiRopes->addRadio("Primitives", PrimNames, 1);
-    vector<string> PolyMesh;
-    PolyMesh.push_back("Mesh");
-    PolyMesh.push_back("PolyLine");
-    guiRopes->addRadio("PolyLine-Mesh", PolyMesh, 1);
-    guiRopes->addSpacer();
-    guiRopes->addSlider("B_smoothing", .001f, 1.0f, bSmooth=0.001f);
-    guiRopes->addSpacer();
-    p_mass = 1.0f;
-    p_drag = 0.96f;
-    sp_k = 0.2f;
-    guiRopes->addSlider("Particle_Mass", .001f, 1.0f, p_mass=0.001f);
-    guiRopes->addSpacer();
-    guiRopes->addSlider("Particle_Drag", 0.0f, 1.0f, p_drag=0.001f);
-    guiRopes->addSpacer();
-    guiRopes->addSlider("Spring_k", 0.0f, 1.0f, sp_k=0.001f);
-    guiRopes->addSpacer();
-    guiRopes->addToggle("Ctrl_Points", &VisCtrlPoints);
-    guiRopes->addSpacer();
-    guiRopes->autoSizeToFitWidgets();
-    ofAddListener(guiRopes->newGUIEvent,this,&ofApp::guiEvent);//event listener
     
     //GUI INIT
     debugDraw = true;

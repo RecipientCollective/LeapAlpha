@@ -4,7 +4,6 @@
 #include "ofxOsc.h"
 #include "ofxLeapMotion2.h"
 #include "Grid.h"
-#include "Rope.h"
 
 class ofApp : public ofBaseApp{
 
@@ -37,19 +36,6 @@ class ofApp : public ofBaseApp{
     //CAMERA
         ofEasyCam cam;
     
-    //ROPE VECTOR AND ROPES NUMBER;
-        Rope** ropeVec;
-        int Rgroup_1 = 100 ;
-    
-    //ADDROPE METHOD
-        int addRope(Rope** ropesArray,Rope *nextRope,int startString,int endString);
-    
-        float GUIForceX;
-        float GUIForceY;
-        float GUIForceZ;
-    
-    //bool tests (Rope Animations)
-        bool MouseFollow = 0;
     
     //GUI
         ofxUISuperCanvas *guiRopes;
@@ -83,7 +69,6 @@ class ofApp : public ofBaseApp{
     // MORE CUSTOM METHODS
         void drawInteractionArea();
         void setLeapMapping();
-        void handsControlSketch1();
         void guiSetup();
         void LeapUpdate();
 };

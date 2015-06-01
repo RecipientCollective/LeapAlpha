@@ -20,21 +20,26 @@ void Swarm::update()
 
 void Swarm::draw()
 {
-    ofPushStyle();
     int i;
     for(i = 0; i < boids.size(); i++)
     {
         boids[i].draw();
     }
-    ofPopStyle();
 }
 
-void Swarm::addBoid() {
+void Swarm::addBoid()
+{
     boids.push_back(Boid());
 }
 
-void Swarm::addBoid(int x, int y) {
+void Swarm::addBoid(int x, int y)
+{
     boids.push_back(Boid(x, y));
+}
+
+void Swarm::addBoid(int x, int y, ofImage texture)
+{
+    boids.push_back(Boid(x, y, texture));
 }
 
 void Swarm::removeBoid(int x, int y, int radius) {
@@ -44,6 +49,16 @@ void Swarm::removeBoid(int x, int y, int radius) {
             boids.erase(boids.begin()+i);
         }
     }
+}
+
+void Swarm::setup()
+{
+    
+}
+
+void Swarm::resize(int w, int h)
+{
+    
 }
 
 void Swarm::clear()

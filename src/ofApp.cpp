@@ -5,12 +5,11 @@
 //--------------------------------------------------------------
 void ofApp::setup()
 {
-    ofSetBackgroundAuto(false);
+    ofBackground(0, 0, 0);
     ofSetFrameRate(60);
     ofSetVerticalSync(true);
     ofEnableAlphaBlending();
     ofEnableSmoothing();
-    ofNoFill();
     
 #ifdef DEBUG
     ofSetLogLevel(OF_LOG_NOTICE);
@@ -50,6 +49,19 @@ void ofApp::update()
             }
         }
     }
+    
+    if (seek)
+    {
+        for (int i = 0; i<swarm.swarmSize(); i++)
+        {
+            ofVec2f dist = swarm.boids[i].loc - seekPoint;
+            if (dist.lengthSquared() < (seekArea*seekArea) )
+            {
+                swarm.boids[i].arrive(seekPoint);
+            }
+        }
+    }
+    
     swarm.update();
 }
 
@@ -58,13 +70,16 @@ void ofApp::draw()
 {
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_NORMALIZE);
-    ofBackground(0, 0, 0);
+    
     
     ofPushMatrix();
     cam.begin();
     
-    // FPS BAR
-    ofSetWindowTitle(ofToString(ofGetFrameRate(),0));
+    if (bMirrorImage)
+    {
+        ofScale(1,-1,1);
+    }
+    
     
     // UPDATE Camera Label
     ofxUILabel *label = (ofxUILabel*) guiLeap->getWidget("leapOn");
@@ -88,11 +103,6 @@ void ofApp::draw()
         box.drawWireframe();
         ofPopStyle();
         ofPopMatrix();
-    }
-    
-    if (bMirrorImage)
-    {
-        ofScale(-1,1,1);
     }
     
     fingerType fingerTypes[] = {THUMB, INDEX, MIDDLE, RING, PINKY};
@@ -135,20 +145,6 @@ void ofApp::draw()
         ofPopStyle();
     }
     
-    // draw center point: if dot < 0 hands are facing
-    if (simpleHands.size() == 2 && simpleHands[0].handNormal.dot(simpleHands[1].handNormal) < 0)
-    {
-        ofPoint center = simpleHands[0].handPos.getMiddle(simpleHands[1].handPos);
-        if (debugDraw)
-        {
-            ofPushStyle();
-            ofSetColor(255, 0, 0);
-            ofDrawSphere(center.x, center.y, center.z, 5);
-            ofPopStyle();
-        }
-        ofLogNotice() << "FACING HANDS: " << simpleHands[0].handNormal.dot(simpleHands[1].handNormal) << "CENTER: " << center;
-    }
-    
     cam.end();
     ofPopMatrix();
     
@@ -156,6 +152,8 @@ void ofApp::draw()
     glDisable(GL_NORMALIZE);
 
     // 2D MODE
+    ofPushMatrix();
+    
     if (bShowHelp)
     {
         string msg = string("Using mouse inputs to navigate (press 'c' to toggle): ") + (cam.getMouseInputEnabled() ? "YES" : "NO");
@@ -170,6 +168,7 @@ void ofApp::draw()
         msg += "move over Z axis (dolly)";
         msg += "LEFT MOUSE DOUBLE CLICK:\n";
         msg += "reset to default position/rotation";
+        
         ofDrawBitmapStringHighlight(msg, 10, ofGetHeight() - 220);
     }
     
@@ -178,7 +177,13 @@ void ofApp::draw()
         drawInteractionArea();
     }
     
-    // SWARM
+    if (bMirrorImage)
+    {
+        ofSetRectMode( OF_RECTMODE_CENTER );
+        ofTranslate(0, ofGetHeight(),0);
+        ofScale(1, -1, 1);
+    }
+    
     if (eraseMode)
     {
         ofPushStyle();
@@ -189,7 +194,16 @@ void ofApp::draw()
         ofPopStyle();
     }
     
-    if (avoid)
+    if (seek && debugDraw)
+    {
+        ofPushStyle();
+        ofSetColor(0,255,0);
+        ofCircle(seekPoint,4.0f);
+        ofNoFill();
+        ofCircle(seekPoint, seekArea);
+        ofPopStyle();
+    }
+    else if (avoid && debugDraw)
     {
         ofPushStyle();
         ofSetColor(255,0,0);
@@ -199,7 +213,14 @@ void ofApp::draw()
         ofPopStyle();
     }
     
+    // SWARM
     swarm.draw();
+    
+    if (bMirrorImage)
+    {
+        ofSetRectMode( OF_RECTMODE_CORNER );
+    }
+    ofPopMatrix();
 }
 
 void ofApp::LeapUpdate()
@@ -211,49 +232,42 @@ void ofApp::LeapUpdate()
     
     if(leap.isFrameNew() && simpleHands.size() )
     {
+        // ONLY FIRST HAND
+        ofPoint handPos    = simpleHands[0].handPos;
+        ofPoint handNormal = simpleHands[0].handNormal;
         
-        //Hands Distance
-        if (simpleHands.size()>1)
+        if (handNormal.y > 0.8f)
         {
-            handsDistance = simpleHands[0].handPos.distance(simpleHands[1].handPos);
-        }
-        
-        //Hands Vel
-        cout<<"L: "<<simpleHands[0].palmVel<< endl;
-        cout<<"R: "<<simpleHands[1].palmVel<< endl;
-        
-        //get and assign Fingers
-        for(int i = 0; i < simpleHands.size(); i++)
-        {
-            for (int f=0; f<5; f++)
-            {
-                int id = simpleHands[i].fingers[ fingerTypes[f] ].id;
-                ofPoint mcp = simpleHands[i].fingers[ fingerTypes[f] ].mcp; // metacarpal
-                ofPoint pip = simpleHands[i].fingers[ fingerTypes[f] ].pip; // proximal
-                ofPoint dip = simpleHands[i].fingers[ fingerTypes[f] ].dip; // distal
-                ofPoint tip = simpleHands[i].fingers[ fingerTypes[f] ].tip; // fingertip
-                fingersFound.push_back(id);
-            }
-        }
-        
-        // get first hand index fingertip for swarm avoid
-        ofPoint index_tip = simpleHands[0].fingers[ fingerTypes[1] ].tip;
-        
-        // z is negative in front of leap
-        if (index_tip.z < 0 && index_tip.z <= avoidZthreshold)
-        {
-            avoid = true;
-            ofVec3f wp = cam.worldToScreen(index_tip);
-            avoidPoint.set(wp.x, wp.y);
+            seek = true;
+            avoid = false;
+            ofVec3f wp = cam.worldToScreen(handPos);
+            seekPoint.set(wp.x, wp.y);
+            
         }
         else
         {
-            avoid = false;
+            seek = false;
+            
+            // get hand index fingertip for swarm avoid
+            ofPoint index_tip = simpleHands[0].fingers[ fingerTypes[1] ].tip;
+            
+            // z is negative in front of leap
+            if (index_tip.z < 0 && index_tip.z <= avoidZthreshold && !avoid)
+            {
+                avoid = true;
+                ofVec3f wp = cam.worldToScreen(index_tip);
+                avoidPoint.set(wp.x, wp.y);
+            }
+            else
+            {
+                avoid = false;
+            }
         }
     }
     
-    if (simpleHands.empty())
+    if (simpleHands.empty() && !bMouseAvoid)
     {
+        seek = false;
         avoid = false;
     }
     
@@ -304,6 +318,7 @@ void ofApp::keyPressed(int key)
         case 'g':
             bShowGui = !bShowGui;
             guiLeap->setVisible(bShowGui);
+            guiSwarm->setVisible(bShowGui);
             break;
         case 'F':
         case 'f':
@@ -312,6 +327,17 @@ void ofApp::keyPressed(int key)
         case 'H':
         case 'h':
             bShowHelp = !bShowHelp;
+            break;
+        case 'S':
+        case 's':
+            guiSwarm ->saveSettings(GUISWARM_SETTINGS);
+            guiLeap -> saveSettings(GUILEAP_SETTINGS);
+            break;
+        case 'L':
+        case 'l':
+            guiSwarm ->loadSettings(GUISWARM_SETTINGS);
+            guiLeap -> loadSettings(GUILEAP_SETTINGS);
+            break;
         default:
             break;
     }
@@ -390,6 +416,9 @@ void ofApp::windowResized(int w, int h)
     slider->setMax(ofGetHeight());
     box.set(ofGetWidth(), ofGetHeight(), outputZrange*2);
     guiSwarm->setPosition(ofGetWidth()-210,10);
+    
+    ofLogNotice() << "H: " << ofGetHeight() << ", W:" << ofGetWidth();
+    swarm.resize(w,h);
 }
 
 //--------------------------------------------------------------
@@ -574,12 +603,15 @@ void ofApp::guiSetup()
     // SWARM DEFAULT OPTIONS
     avoidPoint = ofPoint(0.0,0.0);
     avoid = false;
+    seekPoint = ofPoint(0.0,0.0);
+    seek = false;
     startCount = START_COUNT;
     maxDistance = MAX_DISTANCE;
     bSwarmErase = false;
     bMouseAvoid = false;
     eraseMode = false;
     erasePoint = ofPoint(0.0,0.0);
+    seekArea = 400.0f;
     avoidZthreshold = 0.0f; // position in z to start avoid
     
     // GUI SWARM
@@ -588,9 +620,11 @@ void ofApp::guiSetup()
     guiSwarm->addButton("REINIT SWARM", false);
     guiSwarm->addIntSlider("BOIDS", 1, 1000, &startCount);
     guiSwarm->addSlider("AVOID AREA", 1, 1000, &maxDistance);
+    guiSwarm->addSlider("SEEK AREA", 1, 1000, &seekArea);
     guiSwarm->addToggle("ERASE MODE", &bSwarmErase);
     guiSwarm->addToggle("MOUSE AVOID", &bMouseAvoid);
     guiSwarm->addSlider("AVOID Z THRESHOLD", 0, outputZrange, &avoidZthreshold);
+    guiSwarm->addFPS();
     guiSwarm->autoSizeToFitWidgets();
     ofAddListener(guiSwarm->newGUIEvent,this,&ofApp::guiEvent);//event listener
 }
@@ -598,11 +632,14 @@ void ofApp::guiSetup()
 //--------------------------------------------------------------
 void ofApp::swarmSetup()
 {
+    texture.loadImage(FISH_IMAGE);
+    
     swarm.clear();
+    swarm.setup();
     
     for (int i = 0; i < startCount; i++)
     {
-        swarm.addBoid();
+        swarm.addBoid(ofRandomWidth(),ofRandomHeight(),texture);
     }
 
 }
@@ -612,4 +649,7 @@ void ofApp::exit()
 {
     // let's close down Leap and kill the controller
     leap.close();
+    
+    delete guiSwarm;
+    delete guiLeap;
 }

@@ -20,6 +20,17 @@ Boid::Boid(int x, int y)
     maxforce = MAX_BOID_FORCE;
 }
 
+Boid::Boid(int x, int y, ofImage &tex)
+{
+    loc.set(x,y);
+    vel.set(0,0);
+    acc.set(0,0);
+    r = tex.getWidth();
+    maxspeed = MAX_BOID_SPEED;
+    maxforce = MAX_BOID_FORCE;
+    texture = tex;
+}
+
 // Method to update location
 void Boid::update(vector<Boid> &boids)
 {
@@ -81,6 +92,8 @@ ofVec2f Boid::steer(ofVec2f target, bool slowdown)
 		steer.y = ofClamp(steer.y, -maxforce, maxforce); 
 		
     }
+//    ofLogNotice() << "STERR: " << steer << " POSITON: " << loc << " DESIRED:" << desired;
+//    previous_sterr = steer;
     return steer;
 }
 
@@ -96,11 +109,18 @@ void Boid::draw()
     ofPushMatrix();
     ofTranslate(loc.x, loc.y);
     ofRotateZ(heading2D);
-	ofBeginShape();
-    ofVertex(0, -r*2);
-    ofVertex(-r, r*2);
-    ofVertex(r, r*2);
-    ofEndShape(true);	
+    if (texture.isAllocated())
+    {
+        texture.draw(0,0);
+    }
+    else
+    {
+        ofBeginShape();
+        ofVertex(0, -r*2);
+        ofVertex(-r, r*2);
+        ofVertex(r, r*2);
+        ofEndShape(true);
+    }
     ofPopMatrix();
 	ofPopStyle();
 }

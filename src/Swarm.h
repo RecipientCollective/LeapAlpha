@@ -19,7 +19,10 @@ public:
     void draw();
     void addBoid();
     void addBoid(int x, int y);
+    void addBoid(int x, int y, ofImage texture);
     void clear();
+    void setup();
+    void resize(int w, int h);
     void removeBoid(int x, int y, int radius);
     int swarmSize();
     

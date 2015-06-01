@@ -9,6 +9,9 @@
 #define START_COUNT 300
 #define MAX_DISTANCE 100.0f
 #define ERASE_RADIUS 30.0f
+#define FISH_IMAGE "Fish.png"
+#define GUISWARM_SETTINGS "swarmsettings.xml"
+#define GUILEAP_SETTINGS "leapsettings.xml"
 
 class ofApp : public ofBaseApp{
 
@@ -83,9 +86,13 @@ class ofApp : public ofBaseApp{
         ofPoint avoidPoint;
         bool bMouseAvoid;
         bool avoid;
+        bool seek;
+        ofPoint seekPoint;
+        float seekArea;
         void swarmSetup();
         bool bSwarmErase;
         bool eraseMode;
         float avoidZthreshold;
         ofPoint erasePoint;
+        ofImage texture;
 };

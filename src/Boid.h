@@ -31,8 +31,6 @@ public:
     bool isHit(int x,int y, int radius);
     
 	ofVec2f steer(ofVec2f target, bool slowdown);
-	
-    ofVec2f previous_sterr;
     
 	ofVec2f separate(vector<Boid> &boids);
 	ofVec2f align(vector<Boid> &boids);

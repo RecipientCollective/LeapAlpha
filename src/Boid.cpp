@@ -92,9 +92,8 @@ ofVec2f Boid::steer(ofVec2f target, bool slowdown)
 		steer.y = ofClamp(steer.y, -maxforce, maxforce); 
 		
     }
-//    ofLogNotice() << "STERR: " << steer << " POSITON: " << loc << " DESIRED:" << desired;
-//    previous_sterr = steer;
-    return steer;
+    
+   return steer;
 }
 
 void Boid::draw()
@@ -199,6 +198,7 @@ ofVec2f Boid::separate(vector<Boid> &boids)
 		steer.x = ofClamp(steer.x, -maxforce, maxforce);
 		steer.y = ofClamp(steer.y, -maxforce, maxforce);
     }
+    
     return steer;
 }
 

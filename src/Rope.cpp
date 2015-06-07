@@ -11,11 +11,11 @@
 vector<Particle> ps;
 vector<Spring> sp;
 int W;
-ofPoint prevB;
+ofVec3f prevB;
 ofPoint averageVelB[10];
 ofVec3f VectorDiff;
 
-Rope::Rope(ofPoint _a , ofPoint _b ,int _H, float _WireLength, ofPoint _Forces,float _Gravity, bool _mesh)
+Rope::Rope(ofVec3f _a , ofVec3f _b ,int _H, float _WireLength, ofPoint _Forces,float _Gravity, bool _mesh)
 {
     W = 1;
     H=_H;
@@ -46,7 +46,7 @@ Rope::Rope(ofPoint _a , ofPoint _b ,int _H, float _WireLength, ofPoint _Forces,f
         ofPoint newPPoint = ofPoint (a.x+diffX*i,y,a.z+diffZ*i);
         //Particle p(newPPoint, 1, .96);
         //|| i == H-1
-        Particle p(newPPoint, i==0i == H-1 ? 0 : 1, 0.96);
+        Particle p(newPPoint, i==0||i == H-1 ? 0 : 1, 0.96);
         ps.push_back(p);
     }
     //projected particle
@@ -79,9 +79,7 @@ Rope::Rope(ofPoint _a , ofPoint _b ,int _H, float _WireLength, ofPoint _Forces,f
 }
 void Rope::update()
 {
-    VectorDiff = ps[H-1].pos-ps[H-2].pos;//(b-a)/meshSize;
-    //ps[H].pos=ps[H-1].pos*1.1;
-    //ps[H].pos = ps[H-1].pos+VectorDiff;
+    //VectorDiff = ps[H-1].pos-ps[H-2].pos;//(b-a)/meshSize;
     
     for (int i=0; i<ps.size(); i++)
     {
@@ -107,9 +105,6 @@ void Rope::update()
         ps[i].update();
     }
     
-    //Assign Rope Start and End Point and move with linear interpolation
-    ps[0].pos.interpolate(a, smoothMoveA);
-    ps[H-1].pos.interpolate(b, smoothMoveB);
     
     // RENDER ROPES
     if (!meshRender)
@@ -129,12 +124,12 @@ void Rope::update()
         else
         {
             lineaSbranella.curveTo(ofPoint(ps[1].pos.x, ps[1].pos.y, ps[1].pos.z),15);
-            for (int i=1; i<ps.size()-2; i++)
+            for (int i=1; i<ps.size()-1; i++)
             {
                 ofPoint thisPoint = ofPoint(ps[i].pos.x, ps[i].pos.y, ps[i].pos.z);
                 lineaSbranella.curveTo(thisPoint,15);
             }
-            lineaSbranella.curveTo(ofPoint(ps[H-3].pos.x, ps[H-3].pos.y, ps[H-3].pos.z),15);
+            lineaSbranella.curveTo(ofPoint(ps[H-2].pos.x, ps[H-2].pos.y, ps[H-2].pos.z),15);
         }
     }
     else
@@ -154,6 +149,9 @@ void Rope::update()
             }
         }
     }
+    //Assign Rope Start and End Point and move with linear interpolation
+    ps[0].pos.interpolate(a, smoothMoveA);
+    ps[H-1].pos.interpolate(b, smoothMoveB);
 }
 
 void Rope::draw()
@@ -172,33 +170,33 @@ void Rope::draw()
 
 void Rope::moveATo(ofPoint dest, float smooth)
 {
-    a.interpolate(dest, 0.1f);
+    //a.interpolate(dest, 0.1f);
 }
 
 void Rope::moveBTo(ofPoint dest, float smooth)
 {
-    b.interpolate(dest, 0.1f);
+    //b.interpolate(dest, 0.1f);
 }
 
 void Rope::meshSetup() {
-
+    
     for (int i=0;  i<H; i++)
+    {
+        if ((i==0||i==H-1)&&CtrlPointsVisible)
         {
-            if ((i==0||i==H-1)&&CtrlPointsVisible)
-            {
-                ropeMesh.addVertex(ofPoint(ps[i].pos.x, ps[i].pos.y, ps[i].pos.z));
-                ropeMesh.addColor(ofColor(0, 255, 255));
-            }
-            else if ((i==0||i==H-1)&&!CtrlPointsVisible)
-            {
-                //don't render control points
-                //ropeMesh.addVertex(ofPoint(ps[i].pos.x, ps[i].pos.y, ps[i].pos.z));
-                //ropeMesh.addColor(ofColor(255, 255, 255));
-            }
-            else
-            {
+            ropeMesh.addVertex(ofPoint(ps[i].pos.x, ps[i].pos.y, ps[i].pos.z));
+            ropeMesh.addColor(ofColor(0, 255, 255));
+        }
+        else if ((i==0||i==H-1)&&!CtrlPointsVisible)
+        {
+            //don't render control points
+            //ropeMesh.addVertex(ofPoint(ps[i].pos.x, ps[i].pos.y, ps[i].pos.z));
+            //ropeMesh.addColor(ofColor(255, 255, 255));
+        }
+        else
+        {
             ropeMesh.addVertex(ofPoint(ps[i].pos.x, ps[i].pos.y, ps[i].pos.z));
             ropeMesh.addColor(ofColor(255, 255, 255));
-            }
         }
+    }
 }

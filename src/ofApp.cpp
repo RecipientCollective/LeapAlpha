@@ -15,8 +15,6 @@ bool handsSketch_4;
 bool handsSketch_5;
 bool handsSketch_6;
 bool handsSketch_7;
-ofPoint velocityL;
-ofPoint velocityR;
 
 //SETUP
 //--------------------------------------------------------------
@@ -25,7 +23,7 @@ void ofApp::setup()
     ofSetBackgroundAuto(false);
     ofSetFrameRate(60);
     ofSetVerticalSync(true);
-    ofEnableAlphaBlending();
+    ofEnableAntiAliasing();
     ofEnableSmoothing();
     ofNoFill();
     
@@ -39,51 +37,36 @@ void ofApp::setup()
     
     //leap init
     leap.open();
+    //ofAddListener(leap.simpleHandsSizeChanged,this, &ofApp::onSimpleHandsSizeChanged);
+    
     fingerType fingerTypes[] = {THUMB, INDEX, MIDDLE, RING, PINKY};
     
     //GUI setup and init
     guiSetup();
     
-    // working area
-    box.set(ofGetWidth(), ofGetHeight(), outputZrange*2);
+    //working area
+    box.set(ofGetWidth(), ofGetHeight(), outputZrange);
     box.setPosition(0.0f, 0.0f, 0.0f);
     
-    // Add Group of Ropes
-    ropeVec = new Rope*[Rgroup_1];
-    int ropesLenght = 200;
-    for(int i=0; i<Rgroup_1; i++)
-    {
-        addRope(ropeVec,new Rope(ofPoint(300,200,0),ofPoint(300,500,0),40,ropesLenght,ofPoint(0,0,0),0.01f,true),i,Rgroup_1);
-    }
+    SketchOne.setup();
+    handsSketch_1 = 0;
 }
 
 //--------------------------------------------------------------
 void ofApp::update()
 {
-    //Update Ropes A and B Position
-    for (int j=0;j<Rgroup_1;j++)
-    {
-        ropeVec[j]->update();
-    }
+    //    //Update Ropes A and B Position
+    //    for (int j=0;j<SketchOne.Rgroup_1;j++)
+    //    {
+    //        ropeVec[j]->update();
+    //    }
     
-    //Update Leap Motion Datas
-    LeapUpdate();
+    simpleHands = leap.getSimpleHands();
     
     //HANDS CONTROL SKETCH #1
     if (handsSketch_1)
     {
-        handsControlSketch1();
-    }
-    
-    //Mouse Follow (Ropes Point B)
-    else if (MouseFollow)
-    {
-        mouseisHere = ofPoint(ofGetMouseX(),ofGetMouseY(),0);
-        for (int  i = 0;i<Rgroup_1;i++)
-        {
-            //ropeVec[i]->smoothMoveB=0.06f;
-            ropeVec[i]->b = mouseisHere;
-        }
+        SketchOne.update(simpleHands);
     }
 }
 //--------------------------------------------------------------
@@ -125,72 +108,20 @@ void ofApp::draw()
         ofScale(-1,1,1);
     }
     
-    fingerType fingerTypes[] = {THUMB, INDEX, MIDDLE, RING, PINKY};
-    
     //Draw Hands
     if (debugDraw)
     {
-        for(int i = 0; i < simpleHands.size(); i++)
-        {
-            //simpleHands[0].debugDraw();
-            ofSetColor(0, 0, 255);
-            ofPoint handPos = simpleHands[i].handPos;
-            ofDrawSphere(handPos.x, handPos.y, handPos.z, 5);
-            
-            ofPoint handNormal = simpleHands[i].handNormal;
-            ofSetColor(255, 255, 0);
-            ofDrawArrow(handPos, handPos + 100*handNormal);
-            
-            for (int f=0; f<5; f++)
-            {
-                ofPoint mcp = simpleHands[i].fingers[ fingerTypes[f] ].mcp;  // metacarpal
-                ofPoint pip = simpleHands[i].fingers[ fingerTypes[f] ].pip;  // proximal
-                ofPoint dip = simpleHands[i].fingers[ fingerTypes[f] ].dip;  // distal
-                ofPoint tip = simpleHands[i].fingers[ fingerTypes[f] ].tip;  // fingertip
-                
-                ofSetColor(0, 255, 0);
-                ofDrawSphere(mcp.x, mcp.y, mcp.z, 2);
-                ofDrawSphere(pip.x, pip.y, pip.z, 2);
-                ofDrawSphere(dip.x, dip.y, dip.z, 2);
-                ofDrawSphere(tip.x, tip.y, tip.z, 2);
-                
-                ofSetColor(255, 0, 0);
-                ofSetLineWidth(2);
-                ofLine(mcp.x, mcp.y, mcp.z, pip.x, pip.y, pip.z);
-                ofLine(pip.x, pip.y, pip.z, dip.x, dip.y, dip.z);
-                ofLine(dip.x, dip.y, dip.z, tip.x, tip.y, tip.z);
-            }
-        }
+        drawDebugHands();
     }
     
-    // draw center point: if dot < 0 hands are facing
-    if (simpleHands.size() == 2 && simpleHands[0].handNormal.dot(simpleHands[1].handNormal) < 0)
+    if (handsSketch_1)
     {
-        ofPoint center = simpleHands[0].handPos.getMiddle(simpleHands[1].handPos);
-        if (debugDraw)
-        {
-            ofSetColor(255, 0, 0);
-            ofDrawSphere(center.x, center.y, center.z, 5);
-        }
-        ofLogNotice() << "FACING HANDS: " << simpleHands[0].handNormal.dot(simpleHands[1].handNormal) << "CENTER: " << center;
+        SketchOne.draw();
     }
     
-    
-    //////////////////////////////////////////////////////////
-    //Draw Ropes
-    ofSetLineWidth(0.9f);
-    for (int j=0;j<Rgroup_1;j++)
-    {
-        ropeVec[j]->draw();
-    }
-    //PopMatrix(Hands and Ropes)
     ofPopMatrix();
-    
     cam.end();
     
-    glDisable(GL_DEPTH_TEST);
-    glDisable(GL_NORMALIZE);
-
     // print help
     if (bShowHelp)
     {
@@ -213,101 +144,69 @@ void ofApp::draw()
     {
         drawInteractionArea();
     }
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_NORMALIZE);
 }
-
-void ofApp::LeapUpdate()
+//Draw_Debug_Hands
+void ofApp::drawDebugHands()
 {
-    //leap Update
-    fingersFound.clear();
     fingerType fingerTypes[] = {THUMB, INDEX, MIDDLE, RING, PINKY};
-    simpleHands = leap.getSimpleHands();
-    if(leap.isFrameNew() && simpleHands.size() ){
-        
-        //Hands Distance
-        if (simpleHands.size()>1)
-        handsDistance = simpleHands[0].handPos.distance(simpleHands[1].handPos);
-        
-        //Hands Vel
-        cout<<"L: "<<simpleHands[0].palmVel<< endl;
-        cout<<"R: "<<simpleHands[1].palmVel<< endl;
-        
-        //get and assign Fingers
-        for(int i = 0; i < simpleHands.size(); i++)
-        {
-            for (int f=0; f<5; f++)
-            {
-                int id = simpleHands[i].fingers[ fingerTypes[f] ].id;
-                ofPoint mcp = simpleHands[i].fingers[ fingerTypes[f] ].mcp; // metacarpal
-                ofPoint pip = simpleHands[i].fingers[ fingerTypes[f] ].pip; // proximal
-                ofPoint dip = simpleHands[i].fingers[ fingerTypes[f] ].dip; // distal
-                ofPoint tip = simpleHands[i].fingers[ fingerTypes[f] ].tip; // fingertip
-                fingersFound.push_back(id);
-            }
-        }
-    }
-    //IMPORTANT! - tell ofxLeapMotion that the frame is no longer new.
-    leap.markFrameAsOld();
-}
-
-//handsControlSketch1
-//--------------------------------------------------------------
-void ofApp::handsControlSketch1()
-{
-    //Update Ropes A and B Position
-    for (int j=0;j<Rgroup_1;j++)
+    for(int i = 0; i < simpleHands.size(); i++)
     {
-        float randomOffSet = ofRandom(40)-20;
-        //Assign Hands to A & B
-        if (simpleHands.size()==1)
+        ofSetColor(0, 0, 255);
+        ofPoint handPos = simpleHands[i].handPos;
+        //cout<<handPos<<endl;
+        ofDrawSphere(handPos.x, handPos.y, handPos.z, 5);
+        
+        ofPoint handNormal = simpleHands[i].handNormal;
+        ofSetColor(255, 255, 0);
+        ofDrawArrow(handPos, handPos + 100*handNormal);
+        
+        for (int f=0; f<5; f++)
         {
-            //LeftHand
-            if (simpleHands[0].isLeft)//&&simpleHands[0].handPos.distance(ropeVec[j]->b)<=ropeVec[j]->WireLength)
-            {
-                ropeVec[j]->a.interpolate(simpleHands[0].handPos+randomOffSet,0.1);
-                //ropeVec[j]->a = simpleHands[0].handPos;
-            }
-            //RightHand
-            else if(!simpleHands[0].isLeft)//&&simpleHands[0].handPos.distance(ropeVec[j]->a)<=ropeVec[j]->WireLength)
-            {
-                ropeVec[j]->b.interpolate(simpleHands[0].handPos+randomOffSet,0.1);
-                //ropeVec[j]->b = simpleHands[0].handPos;
-            }
-        }
-        //BOTH HANDS Prova di modifica
-        else if(simpleHands.size()==2)//&&handsDistance<=ropeVec[j]->WireLength)
-        {
-            if (simpleHands[0].isLeft) {
-                ropeVec[j]->a.interpolate(simpleHands[0].handPos+randomOffSet,0.1);
-                ropeVec[j]->b.interpolate(simpleHands[1].handPos+randomOffSet,0.1);
-//                ropeVec[j]->a = simpleHands[0].handPos;
-//                ropeVec[j]->b = simpleHands[1].handPos;
-            }
-            else
-            {
-                ropeVec[j]->b.interpolate(simpleHands[0].handPos+randomOffSet,0.1);
-                ropeVec[j]->a.interpolate(simpleHands[1].handPos+randomOffSet,0.1);
-                //ropeVec[j]->b = simpleHands[0].handPos;
-                //ropeVec[j]->a = simpleHands[1].handPos;
-            }
+            //ofPoint asd = fingersFound
+            ofPoint mcp = simpleHands[i].fingers[ fingerTypes[f] ].mcp;  // metacarpal
+            ofPoint pip = simpleHands[i].fingers[ fingerTypes[f] ].pip;  // proximal
+            ofPoint dip = simpleHands[i].fingers[ fingerTypes[f] ].dip;  // distal
+            ofPoint tip = simpleHands[i].fingers[ fingerTypes[f] ].tip;  // fingertip
+            
+            ofSetColor(0, 255, 0);
+            ofDrawSphere(mcp.x, mcp.y, mcp.z, 2);
+            ofDrawSphere(pip.x, pip.y, pip.z, 2);
+            ofDrawSphere(dip.x, dip.y, dip.z, 2);
+            ofDrawSphere(tip.x, tip.y, tip.z, 2);
+            
+            ofSetColor(255, 0, 0);
+            ofSetLineWidth(2);
+            ofLine(mcp.x, mcp.y, mcp.z, pip.x, pip.y, pip.z);
+            ofLine(pip.x, pip.y, pip.z, dip.x, dip.y, dip.z);
+            ofLine(dip.x, dip.y, dip.z, tip.x, tip.y, tip.z);
         }
     }
+    
+    ofDrawBox(ofPoint(0,-box.getHeight()/2+50,0), 100, 50, 100);
+    
+    // draw center point: if dot < 0 hands are facing
+    if (simpleHands.size() == 2 && simpleHands[0].handNormal.dot(simpleHands[1].handNormal) < 0)
+    {
+        ofPoint center = simpleHands[0].handPos.getMiddle(simpleHands[1].handPos);
+        
+        if (debugDraw)
+        {
+            //ofSetColor(255, 0, 0);
+            ofDrawSphere(center.x, center.y, center.z, 5);
+        }
+        ofLogNotice() << "FACING HANDS: " << simpleHands[0].handNormal.dot(simpleHands[1].handNormal) << "CENTER: " << center;
+    }
 }
-
-//ADDROPE Method
-//--------------------------------------------------------------
-int ofApp::addRope(Rope** ropesVector,Rope *nextRope,int startString,int endString){
-    int i = startString%endString;
-    ropesVector[i] = nextRope;
-}
-
 
 //Set Leap Re-Mapping
 //--------------------------------------------------------------
 void ofApp::setLeapMapping()
 {
-    leap.setMappingX(-leapXrange, leapXrange, -ofGetWidth()/2, ofGetWidth()/2);
-    leap.setMappingZ(-leapZrange, leapZrange, -outputZrange, outputZrange);
-    leap.setMappingY(leapYmin, leapYmax, -ofGetHeight()/2, ofGetHeight()/2);
+    leap.setMappingX(-leapXrange/2, leapXrange/2, -ofGetWidth()/2, ofGetWidth()/2);
+    leap.setMappingZ(-leapZrange, leapZrange, -outputZrange/2, outputZrange/2);
+    leap.setMappingY(leapYmin, leapYmax, -ofGetHeight()/2 , ofGetHeight()/2);
 }
 
 //DRAW INTERACTION AREA
@@ -342,25 +241,25 @@ void ofApp::keyPressed(int key)
             MouseFollow = 0;
             handsSketch_1 = 1;
             break;
-        
+            
         case '2'://HANDS SKETCH #2
             MouseFollow = 0;
             handsSketch_1 = 0;
             handsSketch_2 = 1;
             break;
-
+            
         case '3'://HANDS SKETCH #3
             MouseFollow = 0;
             break;
-        
+            
         case '4'://HANDS SKETCH #4
             MouseFollow = 0;
             break;
-        
+            
         case '5'://HANDS SKETCH #5
             MouseFollow = 0;
             break;
-        
+            
         case '6'://HANDS SKETCH #6
             MouseFollow = 0;
             break;
@@ -380,6 +279,13 @@ void ofApp::keyPressed(int key)
         case 'F':
         case 'f':
             ofToggleFullscreen();
+            if (bSetMapping)
+            {
+                // reset mapping on new output
+                setLeapMapping();
+            }
+            guiRopes->setPosition(ofGetWidth()-210,0);
+            box.set(ofGetWidth(), ofGetHeight(), outputZrange);
             break;
         case 'H':
         case 'h':
@@ -388,60 +294,6 @@ void ofApp::keyPressed(int key)
             break;
     }
 }
-
-//--------------------------------------------------------------
-void ofApp::keyReleased(int key){
-
-}
-
-//--------------------------------------------------------------
-void ofApp::mouseMoved(int x, int y ){
-
-}
-
-//--------------------------------------------------------------
-void ofApp::mouseDragged(int x, int y, int button){
-
-}
-
-//--------------------------------------------------------------
-void ofApp::mousePressed(int x, int y, int button){
-
-}
-
-//--------------------------------------------------------------
-void ofApp::mouseReleased(int x, int y, int button){
-
-}
-
-//--------------------------------------------------------------
-void ofApp::windowResized(int w, int h)
-{
-    if (bSetMapping)
-    {
-        // reset mapping on new output
-        setLeapMapping();
-    }
-    ofxUISlider *slider = (ofxUISlider*) guiLeap->getWidget("WorkArea X range");
-    slider->setMax(ofGetWidth()/2);
-    slider = (ofxUISlider*) guiLeap->getWidget("WorkArea min Y");
-    slider->setMax(ofGetHeight()/2);
-    slider = (ofxUISlider*) guiLeap->getWidget("WorkArea max Y");
-    slider->setMax(ofGetHeight());
-    guiRopes->setPosition(ofGetWidth()-210,0);
-    box.set(ofGetWidth(), ofGetHeight(), outputZrange*2);
-}
-
-//--------------------------------------------------------------
-void ofApp::gotMessage(ofMessage msg){
-
-}
-
-//--------------------------------------------------------------
-void ofApp::dragEvent(ofDragInfo dragInfo){ 
-
-}
-
 //GUI METHODS AND EVENTS
 //--------------------------------------------------------------
 void ofApp::guiEvent(ofxUIEventArgs &e)
@@ -452,25 +304,25 @@ void ofApp::guiEvent(ofxUIEventArgs &e)
     if(name == "X")
     {
         ofxUISlider *slider = (ofxUISlider *) e.widget;
-        for (int k = 0; k<Rgroup_1; k++)
+        for (int k = 0; k<SketchOne.Rgroup_1; k++)
         {
-            ropeVec[k]->ForceX = slider->getScaledValue();
+            SketchOne.ropeVec[k]->ForceX = slider->getScaledValue();
         }
     }
     else if(name == "Y")
     {
         ofxUISlider *slider = (ofxUISlider *) e.widget;
-        for (int k = 0; k<Rgroup_1; k++)
+        for (int k = 0; k<SketchOne.Rgroup_1; k++)
         {
-            ropeVec[k]->ForceY = slider->getScaledValue();
+            SketchOne.ropeVec[k]->ForceY = slider->getScaledValue();
         }
     }
     else if(name == "Z")
     {
         ofxUISlider *slider = (ofxUISlider *) e.widget;
-        for (int k = 0; k<Rgroup_1; k++)
+        for (int k = 0; k<SketchOne.Rgroup_1; k++)
         {
-            ropeVec[k]->ForceZ = slider->getScaledValue();
+            SketchOne.ropeVec[k]->ForceZ = slider->getScaledValue();
         }
     }
     else if (name == "Primitives")
@@ -478,18 +330,17 @@ void ofApp::guiEvent(ofxUIEventArgs &e)
         ofxUIRadio *radio = (ofxUIRadio *) e.widget;
         if (radio->getValue() == 0)
         {
-            for (int k = 0; k<Rgroup_1; k++)
+            for (int k = 0; k<SketchOne.Rgroup_1; k++)
             {
-                ropeVec[k]->ropeMesh.setMode(OF_PRIMITIVE_POINTS);
+                SketchOne.ropeVec[k]->ropeMesh.setMode(OF_PRIMITIVE_POINTS);
             }
         }
         else if (radio->getValue() == 1)
         {
-            for (int k = 0; k<Rgroup_1; k++)
+            for (int k = 0; k<SketchOne.Rgroup_1; k++)
             {
-                ropeVec[k]->ropeMesh.setMode(OF_PRIMITIVE_LINE_STRIP);
+                SketchOne.ropeVec[k]->ropeMesh.setMode(OF_PRIMITIVE_LINE_STRIP);
             }
-            
         }
     }
     else if (name == "PolyLine-Mesh")
@@ -497,61 +348,61 @@ void ofApp::guiEvent(ofxUIEventArgs &e)
         ofxUIRadio *radio = (ofxUIRadio *) e.widget;
         if (radio->getValue() == 0)
         {
-            for (int k = 0; k<Rgroup_1; k++) {
-                ropeVec[k]->meshRender = true;
+            for (int k = 0; k<SketchOne.Rgroup_1; k++) {
+                SketchOne.ropeVec[k]->meshRender = true;
             }
         }
         else if (radio->getValue() == 1)
         {
-            for (int k = 0; k<Rgroup_1; k++)
+            for (int k = 0; k<SketchOne.Rgroup_1; k++)
             {
-                ropeVec[k]->meshRender = false;
+                SketchOne.ropeVec[k]->meshRender = false;
             }
         }
     }
     else if (name == "B_smoothing")
     {
         ofxUISlider *slider = (ofxUISlider *) e.widget;
-        for (int i=0;i < Rgroup_1; i++)
+        for (int i=0;i < SketchOne.Rgroup_1; i++)
         {
-            ropeVec[i]->smoothMoveA = slider->getValue();
-            ropeVec[i]->smoothMoveB = slider->getValue();
+            SketchOne.ropeVec[i]->smoothMoveA = slider->getValue();
+            SketchOne.ropeVec[i]->smoothMoveB = slider->getValue();
         }
     }
     else if (name == "Particle_Mass")
     {
         ofxUISlider *slider = (ofxUISlider *) e.widget;
-        for (int i=0;i < Rgroup_1; i++)
+        for (int i=0;i < SketchOne.Rgroup_1; i++)
         {
-            for (int k = 1; k<ropeVec[i]->ps.size()-1;k++)
-                ropeVec[i]->ps[k].mass = slider->getValue();
+            for (int k = 1; k<SketchOne.ropeVec[i]->ps.size()-1;k++)
+                SketchOne.ropeVec[i]->ps[k].mass = slider->getValue();
         }
     }
     else if (name == "Particle_Drag")
     {
         ofxUISlider *slider = (ofxUISlider *) e.widget;
-        for (int i=0;i < Rgroup_1; i++)
+        for (int i=0;i < SketchOne.Rgroup_1; i++)
         {
-            for (int k =1; k<ropeVec[i]->ps.size()-1;k++)
-                ropeVec[i]->ps[k].drag = slider->getValue();
+            for (int k =1; k<SketchOne.ropeVec[i]->ps.size()-1;k++)
+                SketchOne. ropeVec[i]->ps[k].drag = slider->getValue();
         }
     }
     else if (name == "Spring_k")
     {
         ofxUISlider *slider = (ofxUISlider *) e.widget;
-        for (int i = 0;i < Rgroup_1; i++)
+        for (int i = 0;i < SketchOne.Rgroup_1; i++)
         {
-            for (int k=0; k<ropeVec[i]->sp.size();k++)
-                ropeVec[i]->sp[k].k = slider->getValue();
+            for (int k=0; k<SketchOne.ropeVec[i]->sp.size();k++)
+                SketchOne.ropeVec[i]->sp[k].k = slider->getValue();
         }
     }
     else if (name == "Ctrl_Points")
     {
-        for (int  i=0;i<Rgroup_1;i++)
+        for (int  i=0;i<SketchOne.Rgroup_1;i++)
         {
-            ropeVec[i]->ropeMesh.clear();
-            ropeVec[i]->CtrlPointsVisible = VisCtrlPoints;
-            ropeVec[i]->meshSetup();
+            SketchOne.ropeVec[i]->ropeMesh.clear();
+            SketchOne.ropeVec[i]->CtrlPointsVisible = VisCtrlPoints;
+            SketchOne.ropeVec[i]->meshSetup();
         }
     }
     else if (name == "Debug Draw Hands")
@@ -592,7 +443,6 @@ void ofApp::guiEvent(ofxUIEventArgs &e)
     else if (name == "MappingZone")
     {
         ofxUIToggle *toggle = (ofxUIToggle *) e.widget;
-        
         // leap returns data in mm - lets set a mapping to our world space.
         // you can get back a mapped point by using ofxLeapMotion::getMappedofPoint
         // with the Leap::Vector that tipPosition returns
@@ -607,7 +457,6 @@ void ofApp::guiEvent(ofxUIEventArgs &e)
         {
             leap.resetMapping();
         }
-        
     }
     else if (name == "Z range(output)")
     {
@@ -619,7 +468,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e)
         {
             leap.setMappingZ(-outputZrange, outputZrange, -outputZrange, outputZrange);
         }
-        box.set( ofGetWidth(), ofGetHeight(), outputZrange*2);
+        box.set( ofGetWidth(), ofGetHeight(), outputZrange);
     }
     else if (name == "Show WorkArea")
     {
@@ -632,7 +481,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e)
         //leapXrange = slider->getValue();
         if (bSetMapping)
         {
-            leap.setMappingX(-leapXrange, leapXrange, -ofGetWidth()/2, ofGetWidth()/2);
+            leap.setMappingX(-leapXrange, leapXrange, -box.getWidth()/2, box.getWidth()/2);
         }
     }
     else if (name == "WorkArea Z range")
@@ -641,7 +490,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e)
         //leapZrange = slider->getValue();
         if (bSetMapping)
         {
-            leap.setMappingZ(-leapZrange, leapXrange, -outputZrange, outputZrange);
+            leap.setMappingZ(-leapZrange, leapZrange, -outputZrange/2, outputZrange/2);
         }
     }
     else if (name == "WorkArea min Y")
@@ -650,12 +499,14 @@ void ofApp::guiEvent(ofxUIEventArgs &e)
         //leapYmin = slider->getValue();
         if (bSetMapping)
         {
-            leap.setMappingY(leapYmin, leapYmax, -ofGetHeight()/2, ofGetHeight()/2);
+            cout<<"LeapYmin: "<<leapYmin<<"LeapYMax: "<<leapYmax<<endl;
+            leap.setMappingY(leapYmin, leapYmax, -ofGetHeight()/2,ofGetHeight()/2);
         }
     }
     else if (name == "WorkArea max Y") {
         if (bSetMapping)
         {
+            cout<<"LeapYmin: "<<leapYmin<<"LeapYMax: "<<leapYmax<<endl;
             leap.setMappingY(leapYmin, leapYmax, -ofGetHeight()/2, ofGetHeight()/2);
         }
     }
@@ -685,10 +536,10 @@ void ofApp::guiSetup()
     // z mapped to a cube 200,200
     guiLeap->addSlider("Z range(output)", 0, 500, &outputZrange);
     guiLeap->addToggle("Show WorkArea", &bShowWorkingArea);
-    guiLeap->addSlider("WorkArea X range", 0, ofGetWidth()/2, &leapXrange);
-    guiLeap->addSlider("WorkArea Z range", 0, outputZrange, &leapZrange);
-    guiLeap->addSlider("WorkArea min Y", 0, ofGetHeight()/2, &leapYmin);
-    guiLeap->addSlider("WorkArea max Y",  ofGetHeight()/2, ofGetHeight(), &leapYmax);
+    guiLeap->addSlider("WorkArea X range", 0, 460, &leapXrange);
+    guiLeap->addSlider("WorkArea Z range", 0, outputZrange/2, &leapZrange);
+    guiLeap->addSlider("WorkArea min Y", 10 , 245, &leapYmin);
+    guiLeap->addSlider("WorkArea max Y",  245 , 290, &leapYmax);
     guiLeap->addSpacer();
     guiLeap->addLabel("Press 'H' for Help");
     guiLeap->autoSizeToFitWidgets();
@@ -725,6 +576,10 @@ void ofApp::guiSetup()
     guiRopes->addSpacer();
     guiRopes->addToggle("Ctrl_Points", &VisCtrlPoints);
     guiRopes->addSpacer();
+    guiRopes->addSlider("rotation_accel", 0.0f, 10.0f, &rotationAccel);
+    guiRopes->addSpacer();
+    guiRopes->addSlider("rotation_amp", 0.0f, 5.0f, &rotationAmp);
+    guiRopes->addSpacer();
     guiRopes->autoSizeToFitWidgets();
     ofAddListener(guiRopes->newGUIEvent,this,&ofApp::guiEvent);//event listener
     
@@ -738,14 +593,119 @@ void ofApp::guiSetup()
     bShowGridLabels = false;
     bSetMapping = false;
     outputZrange = 200;
-    leapXrange = 230;
     leapZrange = 150;
-    leapYmin = 90;
-    leapYmax = 490;
+    
+    leapXrange = 460;
+    
+    leapYmin = 20;
+    leapYmax = 200;
+    rotationAccel = 1.5;
+    rotationAmp = 0.3;
+}
+//HANDS VECTOR SIZE CHANGED EVENT
+//--------------------------------------------------------------
+//void ofApp::onSimpleHandsSizeChanged(float & size)
+//{
+//    cout<<"size: "<<size<<endl;
+//    if(simpleHands.size()==1)
+//    {
+//        if(simpleHands[0].isLeft)
+//        {
+//            leftHandPos = &simpleHands[0].handPos ;
+//            leftHandVel = &simpleHands[0].palmVel;
+//            leftHandNormal = &simpleHands[0].handNormal;
+//            lPitch = &simpleHands[0].pitch;
+//            lRoll = &simpleHands[0].roll;
+//            lYaw = &simpleHands[0].yaw;
+//        }
+//        else if (!simpleHands[0].isLeft)
+//        {
+//            rightHandPos = &simpleHands[0].handPos;
+//            rightHandVel = &simpleHands[0].palmVel;
+//            rightHandNormal = &simpleHands[0].handNormal;
+//            rPitch = &simpleHands[0].pitch;
+//            rRoll = &simpleHands[0].roll;
+//            rYaw = &simpleHands[0].yaw;
+//        }
+//    }
+//    else if(simpleHands.size()==2)
+//    {
+//        //Hands Distance
+//        handsDistance = simpleHands[0].handPos.distance(simpleHands[1].handPos);
+//
+//        if(simpleHands[0].isLeft)
+//        {
+//            leftHandPos = &simpleHands[0].handPos;
+//            leftHandVel = &simpleHands[0].palmVel;
+//            leftHandNormal = &simpleHands[0].handNormal;
+//            rightHandPos = &simpleHands[1].handPos;
+//            rightHandVel = &simpleHands[1].palmVel;
+//            rightHandNormal = &simpleHands[1].handNormal;
+//            lPitch = &simpleHands[0].pitch;
+//            lRoll = &simpleHands[0].roll;
+//            lYaw = &simpleHands[0].yaw;
+//            rPitch = &simpleHands[1].pitch;
+//            rRoll = &simpleHands[1].roll;
+//            rYaw = &simpleHands[1].yaw;
+//        }else
+//        {
+//            leftHandPos = &simpleHands[1].handPos;
+//            leftHandVel = &simpleHands[1].palmVel;
+//            leftHandNormal = &simpleHands[1].handNormal;
+//            rightHandPos = &simpleHands[0].handPos;
+//            rightHandVel = &simpleHands[0].palmVel;
+//            rightHandNormal = &simpleHands[0].handNormal;
+//            lPitch = &simpleHands[1].pitch;
+//            lRoll = &simpleHands[1].roll;
+//            lYaw = &simpleHands[1].yaw;
+//            rPitch = &simpleHands[0].pitch;
+//            rRoll = &simpleHands[0].roll;
+//            rYaw = &simpleHands[0].yaw;
+//        }
+//    }
+//}
+//--------------------------------------------------------------
+void ofApp::windowResized(int w, int h)
+{
+    if (bSetMapping)
+    {
+        // reset mapping on new output
+        setLeapMapping();
+    }
+    guiRopes->setPosition(ofGetWidth()-210,0);
+    box.set(ofGetWidth(), ofGetHeight(), outputZrange);
 }
 //--------------------------------------------------------------
 void ofApp::exit()
 {
     // let's close down Leap and kill the controller
     leap.close();
+}
+//--------------------------------------------------------------
+void ofApp::keyReleased(int key)
+{
+}
+//--------------------------------------------------------------
+void ofApp::mouseMoved(int x, int y )
+{
+}
+//--------------------------------------------------------------
+void ofApp::mouseDragged(int x, int y, int button)
+{
+}
+//--------------------------------------------------------------
+void ofApp::mousePressed(int x, int y, int button)
+{
+}
+//--------------------------------------------------------------
+void ofApp::mouseReleased(int x, int y, int button)
+{
+}
+//--------------------------------------------------------------
+void ofApp::gotMessage(ofMessage msg)
+{
+}
+//--------------------------------------------------------------
+void ofApp::dragEvent(ofDragInfo dragInfo)
+{
 }

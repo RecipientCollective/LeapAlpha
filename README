@@ -1,3 +1,9 @@
+07-06-15
+ChangeLog:
+Adesso gli sketch sono implementati come classi separate.
+Si possono quindi aggiungere gli altri progetti e lavorare tutti sullo stesso branch.
+Vedi Sketch_1.cpp
+
 26-05-15
 Changelog: 
 	- Modificato ofxLeapMotion2: 

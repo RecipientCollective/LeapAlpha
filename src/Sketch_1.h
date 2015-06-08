@@ -46,7 +46,7 @@ public:
 
     //ROPES
     Rope** ropeVec;
-    int Rgroup_1 = 50 ;
+    int Rgroup_1 = 1 ;
     //ADDROPE METHOD
     int addRope(Rope** ropesArray,Rope *nextRope,int startString,int endString);
 };

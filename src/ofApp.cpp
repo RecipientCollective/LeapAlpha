@@ -60,14 +60,20 @@ void ofApp::update()
     //    {
     //        ropeVec[j]->update();
     //    }
+    if (leap.isFrameNew())
+    {
+        simpleHands = leap.getSimpleHands();
+    }
     
-    simpleHands = leap.getSimpleHands();
     
     //HANDS CONTROL SKETCH #1
     if (handsSketch_1)
     {
         SketchOne.update(simpleHands);
     }
+    
+    //IMPORTANT! - tell ofxLeapMotion that the frame is no longer new.
+    leap.markFrameAsOld();
 }
 //--------------------------------------------------------------
 void ofApp::draw()
@@ -290,6 +296,13 @@ void ofApp::keyPressed(int key)
         case 'H':
         case 'h':
             bShowHelp = !bShowHelp;
+            break;
+        case 'm':
+            for(int j=0;j<SketchOne.Rgroup_1;j++)
+            {
+                SketchOne.ropeVec[j]->ps[10].addForce(ofPoint(0,10000,10000));
+            }
+                
         default:
             break;
     }
@@ -565,14 +578,14 @@ void ofApp::guiSetup()
     guiRopes->addSpacer();
     guiRopes->addSlider("B_smoothing", .001f, 1.0f, bSmooth=0.001f);
     guiRopes->addSpacer();
-    p_mass = 1.0f;
+    p_mass = 0.0001f;
     p_drag = 0.96f;
     sp_k = 0.2f;
-    guiRopes->addSlider("Particle_Mass", .001f, 1.0f, p_mass=0.001f);
+    guiRopes->addSlider("Particle_Mass", .001f, 10.0f, p_mass=0.001f);
     guiRopes->addSpacer();
-    guiRopes->addSlider("Particle_Drag", 0.0f, 1.0f, p_drag=0.001f);
+    guiRopes->addSlider("Particle_Drag", 0.0f, 10.0f, p_drag=0.001f);
     guiRopes->addSpacer();
-    guiRopes->addSlider("Spring_k", 0.0f, 1.0f, sp_k=0.001f);
+    guiRopes->addSlider("Spring_k", 0.0f, 10.0f, sp_k=0.001f);
     guiRopes->addSpacer();
     guiRopes->addToggle("Ctrl_Points", &VisCtrlPoints);
     guiRopes->addSpacer();
@@ -602,68 +615,6 @@ void ofApp::guiSetup()
     rotationAccel = 1.5;
     rotationAmp = 0.3;
 }
-//HANDS VECTOR SIZE CHANGED EVENT
-//--------------------------------------------------------------
-//void ofApp::onSimpleHandsSizeChanged(float & size)
-//{
-//    cout<<"size: "<<size<<endl;
-//    if(simpleHands.size()==1)
-//    {
-//        if(simpleHands[0].isLeft)
-//        {
-//            leftHandPos = &simpleHands[0].handPos ;
-//            leftHandVel = &simpleHands[0].palmVel;
-//            leftHandNormal = &simpleHands[0].handNormal;
-//            lPitch = &simpleHands[0].pitch;
-//            lRoll = &simpleHands[0].roll;
-//            lYaw = &simpleHands[0].yaw;
-//        }
-//        else if (!simpleHands[0].isLeft)
-//        {
-//            rightHandPos = &simpleHands[0].handPos;
-//            rightHandVel = &simpleHands[0].palmVel;
-//            rightHandNormal = &simpleHands[0].handNormal;
-//            rPitch = &simpleHands[0].pitch;
-//            rRoll = &simpleHands[0].roll;
-//            rYaw = &simpleHands[0].yaw;
-//        }
-//    }
-//    else if(simpleHands.size()==2)
-//    {
-//        //Hands Distance
-//        handsDistance = simpleHands[0].handPos.distance(simpleHands[1].handPos);
-//
-//        if(simpleHands[0].isLeft)
-//        {
-//            leftHandPos = &simpleHands[0].handPos;
-//            leftHandVel = &simpleHands[0].palmVel;
-//            leftHandNormal = &simpleHands[0].handNormal;
-//            rightHandPos = &simpleHands[1].handPos;
-//            rightHandVel = &simpleHands[1].palmVel;
-//            rightHandNormal = &simpleHands[1].handNormal;
-//            lPitch = &simpleHands[0].pitch;
-//            lRoll = &simpleHands[0].roll;
-//            lYaw = &simpleHands[0].yaw;
-//            rPitch = &simpleHands[1].pitch;
-//            rRoll = &simpleHands[1].roll;
-//            rYaw = &simpleHands[1].yaw;
-//        }else
-//        {
-//            leftHandPos = &simpleHands[1].handPos;
-//            leftHandVel = &simpleHands[1].palmVel;
-//            leftHandNormal = &simpleHands[1].handNormal;
-//            rightHandPos = &simpleHands[0].handPos;
-//            rightHandVel = &simpleHands[0].palmVel;
-//            rightHandNormal = &simpleHands[0].handNormal;
-//            lPitch = &simpleHands[1].pitch;
-//            lRoll = &simpleHands[1].roll;
-//            lYaw = &simpleHands[1].yaw;
-//            rPitch = &simpleHands[0].pitch;
-//            rRoll = &simpleHands[0].roll;
-//            rYaw = &simpleHands[0].yaw;
-//        }
-//    }
-//}
 //--------------------------------------------------------------
 void ofApp::windowResized(int w, int h)
 {

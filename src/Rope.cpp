@@ -46,7 +46,7 @@ Rope::Rope(ofVec3f _a , ofVec3f _b ,int _H, float _WireLength, ofPoint _Forces,f
         ofPoint newPPoint = ofPoint (a.x+diffX*i,y,a.z+diffZ*i);
         //Particle p(newPPoint, 1, .96);
         //|| i == H-1
-        Particle p(newPPoint, i==0||i == H-1 ? 0 : 1, 0.96);
+        Particle p(newPPoint, i==0||i == H-1 ? 50 : 0.2, 0.96);
         ps.push_back(p);
     }
     //projected particle

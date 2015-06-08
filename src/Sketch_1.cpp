@@ -16,7 +16,7 @@ void Sketch_1::setup()
     {
         //cout<<"addrope: "<<i<<endl;
         //int ropesLenght = ofRandom(200)+100;
-        addRope(ropeVec,new Rope(ofPoint(0,0,0),ofPoint(0,0,0),50,ropesLenght,ofPoint(0,0,0),0.0f,true),i,Rgroup_1);
+        addRope(ropeVec,new Rope(ofPoint(0,0,0),ofPoint(0,0,0),20,ropesLenght,ofPoint(0,0,0),0.0f,true),i,Rgroup_1);
     }
     
     //setup on separate sketch

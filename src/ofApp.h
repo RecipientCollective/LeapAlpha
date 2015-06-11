@@ -6,7 +6,7 @@
 #include "Grid.h"
 #include "Swarm.h"
 
-#define START_COUNT 300
+#define START_COUNT 400
 #define MAX_DISTANCE 400.0f
 #define MAXSEEKAREA 400.0f
 #define ERASE_RADIUS 30.0f

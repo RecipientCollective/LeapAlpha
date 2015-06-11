@@ -6,7 +6,7 @@
 void ofApp::setup()
 {
     ofBackground(0, 0, 0);
-    ofSetFrameRate(30);
+    ofSetFrameRate(FRAMERATE);
     ofSetVerticalSync(true);
     ofEnableAlphaBlending();
     ofEnableSmoothing();

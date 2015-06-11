@@ -13,6 +13,7 @@
 #define FISH_IMAGE "Fish.png"
 #define GUISWARM_SETTINGS "swarmsettings.xml"
 #define GUILEAP_SETTINGS "leapsettings.xml"
+#define FRAMERATE 60
 
 class ofApp : public ofBaseApp{
 

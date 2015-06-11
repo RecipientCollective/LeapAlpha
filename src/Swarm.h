@@ -21,7 +21,8 @@ public:
     void addBoid(int x, int y);
     void addBoid(int x, int y, ofImage texture);
     void clear();
-    void setup();
+    void setup(int n);
+    void setup(int n, ofImage texture);
     void resize(int w, int h);
     void removeBoid(int x, int y, int radius);
     int swarmSize();

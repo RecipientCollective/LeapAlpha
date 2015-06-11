@@ -20,6 +20,9 @@ void Swarm::update()
 
 void Swarm::draw()
 {
+    int w = ofGetWidth();
+    int h = ofGetHeight();
+    
     int i;
     for(i = 0; i < boids.size(); i++)
     {
@@ -51,9 +54,20 @@ void Swarm::removeBoid(int x, int y, int radius) {
     }
 }
 
-void Swarm::setup()
+void Swarm::setup(int n)
 {
-    
+    for (int i = 0; i < n; i++)
+    {
+        addBoid(ofRandomWidth(),ofRandomHeight());
+    }
+}
+
+void Swarm::setup(int n, ofImage texture)
+{
+    for (int i = 0; i < n; i++)
+    {
+        addBoid(ofRandomWidth(),ofRandomHeight(), texture);
+    }
 }
 
 void Swarm::resize(int w, int h)

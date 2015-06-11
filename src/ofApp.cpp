@@ -626,15 +626,8 @@ void ofApp::guiSetup()
 void ofApp::swarmSetup()
 {
     texture.loadImage(FISH_IMAGE);
-    
     swarm.clear();
-    swarm.setup();
-    
-    for (int i = 0; i < startCount; i++)
-    {
-        swarm.addBoid(ofRandomWidth(),ofRandomHeight(),texture);
-    }
-
+    swarm.setup(startCount, texture);
 }
 
 //--------------------------------------------------------------

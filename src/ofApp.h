@@ -7,7 +7,8 @@
 #include "Swarm.h"
 
 #define START_COUNT 300
-#define MAX_DISTANCE 100.0f
+#define MAX_DISTANCE 400.0f
+#define MAXSEEKAREA 400.0f
 #define ERASE_RADIUS 30.0f
 #define FISH_IMAGE "Fish.png"
 #define GUISWARM_SETTINGS "swarmsettings.xml"
@@ -62,6 +63,9 @@ class ofApp : public ofBaseApp{
         float leapYmin;
         float leapYmax;
         float outputZrange;
+        float outputXrange;
+        float outputYmin;
+        float outputYmax;
         bool bShowWorkingArea;
     
         ofxUISuperCanvas *guiSwarm;

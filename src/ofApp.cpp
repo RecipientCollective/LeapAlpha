@@ -25,7 +25,7 @@ void ofApp::setup()
     guiSetup();
     
     // working area
-    box.set(ofGetWidth(), ofGetHeight(), outputZrange*2);
+    box.set(outputXrange*2, outputYmax - outputYmin, outputZrange*2);
     box.setPosition(0.0f, 0.0f, 0.0f);
     
     swarmSetup();
@@ -62,6 +62,7 @@ void ofApp::update()
         }
     }
     
+    // update swarm every 4 frame
     swarm.update();
 }
 
@@ -279,9 +280,9 @@ void ofApp::LeapUpdate()
 //--------------------------------------------------------------
 void ofApp::setLeapMapping()
 {
-    leap.setMappingX(-leapXrange, leapXrange, -ofGetWidth()/2, ofGetWidth()/2);
+    leap.setMappingX(-leapXrange, leapXrange, -outputXrange, outputXrange);
     leap.setMappingZ(-leapZrange, leapZrange, -outputZrange, outputZrange);
-    leap.setMappingY(leapYmin, leapYmax, -ofGetHeight()/2, ofGetHeight()/2);
+    leap.setMappingY(leapYmin, leapYmax, outputYmin, outputYmax);
 }
 
 //DRAW INTERACTION AREA
@@ -408,13 +409,15 @@ void ofApp::windowResized(int w, int h)
         // reset mapping on new output
         setLeapMapping();
     }
-    ofxUISlider *slider = (ofxUISlider*) guiLeap->getWidget("WorkArea X range");
-    slider->setMax(ofGetWidth()/2);
-    slider = (ofxUISlider*) guiLeap->getWidget("WorkArea min Y");
-    slider->setMax(ofGetHeight()/2);
-    slider = (ofxUISlider*) guiLeap->getWidget("WorkArea max Y");
+    ofxUISlider *slider = (ofxUISlider*) guiLeap->getWidget("X range (output)");
+    slider->setMax(ofGetWidth());
+    slider = (ofxUISlider*) guiLeap->getWidget("Y min (output)");
     slider->setMax(ofGetHeight());
-    box.set(ofGetWidth(), ofGetHeight(), outputZrange*2);
+    slider->setMin(-ofGetHeight());
+    slider = (ofxUISlider*) guiLeap->getWidget("Y max (output)");
+    slider->setMax(ofGetHeight());
+    slider->setMin(-ofGetHeight());
+    
     guiSwarm->setPosition(ofGetWidth()-210,10);
     
     ofLogNotice() << "H: " << ofGetHeight() << ", W:" << ofGetWidth();
@@ -495,62 +498,46 @@ void ofApp::guiEvent(ofxUIEventArgs &e)
     }
     else if (name == "Z range(output)")
     {
-        //ofxUISlider *slider = (ofxUISlider *) e.widget; ;
-        //outputZrange = slider->getValue();
-        ofxUISlider *sliderWAreaX = (ofxUISlider *)guiLeap->getWidget("WorkArea Z range");
-        sliderWAreaX->setMax(outputZrange);
-        
-        ofxUISlider *sliderZavoid = (ofxUISlider *)guiSwarm->getWidget("AVOID Z THRESHOLD");
-        sliderZavoid->setMax(outputZrange);
-        
-        if (bSetMapping)
-        {
-            leap.setMappingZ(-outputZrange, outputZrange, -outputZrange, outputZrange);
-        }
-        box.set( ofGetWidth(), ofGetHeight(), outputZrange*2);
+        box.set( outputXrange, outputYmax-outputYmin, outputZrange*2);
+        setLeapMapping();
     }
-    else if (name == "Show WorkArea")
+    else if (name == "X range (output)")
     {
-        ofxUIToggle *toggle = (ofxUIToggle *) e.widget;
-        //bShowWorkingArea = toggle->getValue();
+        box.set( outputXrange, outputYmax-outputYmin, outputZrange*2);
+        setLeapMapping();
+    }
+    else if (name == "Y min (output)")
+    {
+        box.set( outputXrange, outputYmax-outputYmin, outputZrange*2);
+        setLeapMapping();
+    }
+    else if (name == "Y max (output)")
+    {
+        box.set( outputXrange, outputYmax-outputYmin, outputZrange*2);
+        setLeapMapping();
     }
     else if (name == "WorkArea X range")
     {
-        ofxUISlider *slider = (ofxUISlider *) e.widget;
-        //leapXrange = slider->getValue();
-        if (bSetMapping)
-        {
-            leap.setMappingX(-leapXrange, leapXrange, -ofGetWidth()/2, ofGetWidth()/2);
-        }
+        setLeapMapping();
     }
     else if (name == "WorkArea Z range")
     {
-        ofxUISlider *slider = (ofxUISlider *) e.widget;
-        //leapZrange = slider->getValue();
-        if (bSetMapping)
-        {
-            leap.setMappingZ(-leapZrange, leapXrange, -outputZrange, outputZrange);
-        }
+        setLeapMapping();
     }
     else if (name == "WorkArea min Y")
     {
-        ofxUISlider *slider = (ofxUISlider *) e.widget;
-        //leapYmin = slider->getValue();
-        if (bSetMapping)
-        {
-            leap.setMappingY(leapYmin, leapYmax, -ofGetHeight()/2, ofGetHeight()/2);
-        }
+        setLeapMapping();
     }
-    else if (name == "WorkArea max Y") {
-        if (bSetMapping)
-        {
-            leap.setMappingY(leapYmin, leapYmax, -ofGetHeight()/2, ofGetHeight()/2);
-        }
+    else if (name == "WorkArea max Y")
+    {
+        setLeapMapping();
     }
-    else if (name == "REINIT SWARM") {
+    else if (name == "REINIT SWARM")
+    {
         swarmSetup();
     }
 }
+
 void ofApp::guiSetup()
 {
     // Show/Hide GUI Elements
@@ -574,12 +561,15 @@ void ofApp::guiSetup()
     guiLeap->addSpacer();
     guiLeap->addToggle("MappingZone", &bSetMapping);
     // z mapped to a cube 200,200
+    guiLeap->addSlider("X range (output)", 0, ofGetWidth(), &outputXrange);
+    guiLeap->addSlider("Y min (output)", -ofGetHeight(), ofGetHeight(), &outputYmin);
+    guiLeap->addSlider("Y max (output)", -ofGetHeight(), ofGetHeight(), &outputYmax);
     guiLeap->addSlider("Z range(output)", 0, 500, &outputZrange);
     guiLeap->addToggle("Show WorkArea", &bShowWorkingArea);
-    guiLeap->addSlider("WorkArea X range", 0, ofGetWidth()/2, &leapXrange);
+    guiLeap->addSlider("WorkArea X range", 0, outputXrange, &leapXrange);
     guiLeap->addSlider("WorkArea Z range", 0, outputZrange, &leapZrange);
-    guiLeap->addSlider("WorkArea min Y", 0, ofGetHeight()/2, &leapYmin);
-    guiLeap->addSlider("WorkArea max Y",  ofGetHeight()/2, ofGetHeight(), &leapYmax);
+    guiLeap->addSlider("WorkArea min Y", outputYmin, outputYmax, &leapYmin);
+    guiLeap->addSlider("WorkArea max Y",  outputYmin, outputYmax, &leapYmax);
     guiLeap->addSpacer();
     guiLeap->addLabel("Press 'H' for Help");
     guiLeap->autoSizeToFitWidgets();
@@ -595,6 +585,9 @@ void ofApp::guiSetup()
     bShowGridLabels = false;
     bSetMapping = false;
     outputZrange = 200;
+    outputXrange = ofGetWidth()/2.0f;
+    outputYmin = 0.0f;
+    outputYmax = ofGetHeight();
     leapXrange = 230;
     leapZrange = 150;
     leapYmin = 90;
@@ -611,7 +604,7 @@ void ofApp::guiSetup()
     bMouseAvoid = false;
     eraseMode = false;
     erasePoint = ofPoint(0.0,0.0);
-    seekArea = 400.0f;
+    seekArea = MAXSEEKAREA;
     avoidZthreshold = 0.0f; // position in z to start avoid
     
     // GUI SWARM

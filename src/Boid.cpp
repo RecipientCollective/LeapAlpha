@@ -34,8 +34,8 @@ Boid::Boid(int x, int y, ofImage &tex)
 // Method to update location
 void Boid::update(vector<Boid> &boids)
 {
-	
-	flock(boids);
+   
+    flock(boids);
 	
     vel += acc;   // Update velocity
     vel.x = ofClamp(vel.x, -maxspeed, maxspeed);  // Limit speed
@@ -168,11 +168,12 @@ ofVec2f Boid::separate(vector<Boid> &boids)
 		float d = ofDist(loc.x, loc.y, other.loc.x, other.loc.y);
 		
 		// If the distance is greater than 0 and less than an arbitrary amount (0 when you are yourself)
-		if ((d > 0) && (d < desiredseparation)) {
+		if ((d > 0) && (d < desiredseparation))
+        {
 			// Calculate vector pointing away from neighbor
 			ofVec2f diff = loc - other.loc;
 			diff /= d;			// normalize
-			diff /= d;        // Weight by distance
+			diff /= d;          // Weight by distance
 			steer += diff;
 			count++;            // Keep track of how many
 		}
@@ -251,6 +252,7 @@ ofVec2f Boid::cohesion(vector<Boid> &boids)
     {
 		Boid &other = boids[i];
 		float d = ofDist(loc.x, loc.y, other.loc.x, other.loc.y);
+        
 		if ((d > 0) && (d < neighbordist))
         {
 			sum += other.loc; // Add location
@@ -265,4 +267,3 @@ ofVec2f Boid::cohesion(vector<Boid> &boids)
     }
     return sum;
 }
-

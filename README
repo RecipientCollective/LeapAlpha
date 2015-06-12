@@ -1,3 +1,17 @@
+13-06-15
+ChangeLog:
+- Added Sketch #2
+- Three new constructors for Rope Class
+- ofApp now manages Leap Motion data grabbing and debugging, sketches elaborate Hands data (which are passed in update)
+- Ropes Physics improved
+- Solved: Mouse disappears on Fullscreen in Yosemite
+- Hands Mapping on scene now fully working
+
+To Do:
+Solve Antialiasing Problems
+Other Sketches
+Merge with flocking algorthm sketches branch
+
 07-06-15
 ChangeLog:
 Adesso gli sketch sono implementati come classi separate.

@@ -1,11 +1,11 @@
 #pragma once
 #include "ofMain.h"
 #include "ofxUI.h"
-#include "ofxOsc.h"
 #include "ofxLeapMotion2.h"
 #include "Grid.h"
 #include "Rope.h"
 #include "Sketch_1.h"
+#include "Sketch_2.h"
 
 class ofApp : public ofBaseApp{
     
@@ -26,27 +26,16 @@ public:
     void dragEvent(ofDragInfo dragInfo);
     void gotMessage(ofMessage msg);
     
-    Sketch_1    SketchOne;
-    
     //LEAP
     ofxLeapMotion leap;
     vector <int> fingersFound;
     vector <ofxLeapMotionSimpleHand> simpleHands;
-    //void onSimpleHandsSizeChanged(float & size);
+    
+    Sketch_1    SketchOne;
+    Sketch_2    SketchTwo;
     
     //CAMERA
     ofEasyCam cam;
-    
-    //ROPE VECTOR AND ROPES NUMBER;
-    //Rope** ropeVec;
-    //int Rgroup_1 = 50 ;
-    
-    //ADDROPE METHOD
-    //int addRope(Rope** ropesArray,Rope *nextRope,int startString,int endString);
-    
-    float GUIForceX;
-    float GUIForceY;
-    float GUIForceZ;
     
     //bool tests (Rope Animations)
     bool MouseFollow = 0;
@@ -75,6 +64,10 @@ public:
     float rotationAccel;
     float rotationAmp;
     
+    float GUIForceX;
+    float GUIForceY;
+    float GUIForceZ;
+        
     // GUI EVENTS
     void guiEvent(ofxUIEventArgs &e);
     
@@ -89,4 +82,5 @@ public:
     void guiSetup();
     void LeapUpdate();
     void drawDebugHands();
+    
 };

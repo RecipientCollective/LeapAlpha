@@ -1,25 +1,26 @@
 //
-//  Sketch_1.h
+//  Sketch_2.h
 //  LeapAlpha
 //
 //  Created by Alessandro Inguglia on 07/06/15.
 //
 //
 
-#ifndef __LeapAlpha__Sketch_1__
-#define __LeapAlpha__Sketch_1__
-#endif
+#ifndef __LeapAlpha__Sketch_2__
+#define __LeapAlpha__Sketch_2__
+
 
 #include "ofMain.h"
 #include "Rope.h"
 #include "ofxLeapMotion2.h"
 #include "ofxUI.h"
 #include "ofEvents.h"
+#include "ofxOsc.h"
 
 #define HOST "localhost"
-#define PORT 12345
+#define PORT 8000
 
-class Sketch_1 {
+class Sketch_2 {
 public:
     
     // main
@@ -32,7 +33,7 @@ public:
     void windowResize(ofResizeEventArgs& data);
     
     void SketchQuit();
-    
+   
     //Leap Hands
     float handsDistance = 0.0f;
     ofPoint *leftHandPos = new ofPoint (0,0,0);
@@ -47,6 +48,9 @@ public:
     float *rPitch = new float (0.0f);
     float *rRoll = new float (0.0f);
     float *rYaw = new float  (0.0f);
+    
+    ofxOscSender sender;
+    ofxOscMessage m;
     
     //ROPES
     Rope** ropeVec;
@@ -71,6 +75,6 @@ public:
     float rotationAmp;
     
 private:
-    bool currentSketch = false;
-   // ofxOscSender sender;
+     bool currentSketch=false;
 };
+#endif

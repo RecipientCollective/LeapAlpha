@@ -74,6 +74,7 @@
 		D20D98271B10BF9600E04CCD /* ofxXmlSettings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D20D98221B10BF9600E04CCD /* ofxXmlSettings.cpp */; };
 		D276B2EF1B0FA646002D5762 /* Rope.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D276B2ED1B0FA646002D5762 /* Rope.cpp */; };
 		D292B4B21B24DF0C00EBE4E1 /* Sketch_1.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D292B4B01B24DF0C00EBE4E1 /* Sketch_1.cpp */; };
+		D292E1B91B2B8F2B00130DCD /* Sketch_2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D292E1B71B2B8F2B00130DCD /* Sketch_2.cpp */; };
 		E4328149138ABC9F0047C5CB /* openFrameworksDebug.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E4328148138ABC890047C5CB /* openFrameworksDebug.a */; };
 		E45BE97B0E8CC7DD009D7055 /* AGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E45BE9710E8CC7DD009D7055 /* AGL.framework */; };
 		E45BE97C0E8CC7DD009D7055 /* ApplicationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E45BE9720E8CC7DD009D7055 /* ApplicationServices.framework */; };
@@ -267,6 +268,8 @@
 		D276B2F11B0FA665002D5762 /* Spring.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Spring.h; sourceTree = "<group>"; };
 		D292B4B01B24DF0C00EBE4E1 /* Sketch_1.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Sketch_1.cpp; sourceTree = "<group>"; };
 		D292B4B11B24DF0C00EBE4E1 /* Sketch_1.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Sketch_1.h; sourceTree = "<group>"; };
+		D292E1B71B2B8F2B00130DCD /* Sketch_2.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Sketch_2.cpp; sourceTree = "<group>"; };
+		D292E1B81B2B8F2B00130DCD /* Sketch_2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Sketch_2.h; sourceTree = "<group>"; };
 		D9BFFBBF4CC43DEE890B3C3E /* OscTypes.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 30; name = OscTypes.cpp; path = ../../../addons/ofxOsc/libs/oscpack/src/osc/OscTypes.cpp; sourceTree = SOURCE_ROOT; };
 		DF49D76C45D5DB505A234880 /* ofxOscMessage.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 30; name = ofxOscMessage.cpp; path = ../../../addons/ofxOsc/src/ofxOscMessage.cpp; sourceTree = SOURCE_ROOT; };
 		E4328143138ABC890047C5CB /* openFrameworksLib.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = openFrameworksLib.xcodeproj; path = ../../../libs/openFrameworksCompiled/project/osx/openFrameworksLib.xcodeproj; sourceTree = SOURCE_ROOT; };
@@ -663,6 +666,8 @@
 				551FD14E1B0F205400667BD9 /* Grid.h */,
 				D292B4B01B24DF0C00EBE4E1 /* Sketch_1.cpp */,
 				D292B4B11B24DF0C00EBE4E1 /* Sketch_1.h */,
+				D292E1B71B2B8F2B00130DCD /* Sketch_2.cpp */,
+				D292E1B81B2B8F2B00130DCD /* Sketch_2.h */,
 			);
 			path = src;
 			sourceTree = SOURCE_ROOT;
@@ -836,6 +841,7 @@
 				67FE4C7B15C2F0478C8126C2 /* NetworkingUtils.cpp in Sources */,
 				D20D97C41B10BF3000E04CCD /* ofxUIImage.cpp in Sources */,
 				D20D97BE1B10BF3000E04CCD /* ofxUICircleSlider.cpp in Sources */,
+				D292E1B91B2B8F2B00130DCD /* Sketch_2.cpp in Sources */,
 				510CAFE035E576A4E1502D52 /* UdpSocket.cpp in Sources */,
 				D20D97D51B10BF3000E04CCD /* ofxUIScrollableCanvas.cpp in Sources */,
 				D292B4B21B24DF0C00EBE4E1 /* Sketch_1.cpp in Sources */,

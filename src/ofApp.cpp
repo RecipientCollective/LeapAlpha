@@ -1,13 +1,6 @@
 #include "ofApp.h"
 #include <Poco/Path.h>
 
-ofPoint mouseisHere;
-float bSmooth;
-float p_mass;
-float p_drag;
-float sp_k;
-bool VisCtrlPoints;
-int nPoints;
 bool handsSketch_1;
 bool handsSketch_2;
 bool handsSketch_3;
@@ -23,11 +16,12 @@ void ofApp::setup()
     ofSetBackgroundAuto(false);
     ofSetFrameRate(60);
     ofSetVerticalSync(true);
-    ofEnableAntiAliasing();
+    //ofEnableAntiAliasing();
     ofEnableSmoothing();
     ofNoFill();
     
-    VisCtrlPoints = 0;
+    SketchOne.SetupListeners();
+    SketchTwo.SetupListeners();
     
 #ifdef DEBUG
     ofSetLogLevel(OF_LOG_NOTICE);
@@ -37,7 +31,6 @@ void ofApp::setup()
     
     //leap init
     leap.open();
-    //ofAddListener(leap.simpleHandsSizeChanged,this, &ofApp::onSimpleHandsSizeChanged);
     
     fingerType fingerTypes[] = {THUMB, INDEX, MIDDLE, RING, PINKY};
     
@@ -47,29 +40,23 @@ void ofApp::setup()
     //working area
     box.set(ofGetWidth(), ofGetHeight(), outputZrange);
     box.setPosition(0.0f, 0.0f, 0.0f);
-    
-    SketchOne.setup();
-    handsSketch_1 = 0;
 }
 
 //--------------------------------------------------------------
 void ofApp::update()
 {
-    //    //Update Ropes A and B Position
-    //    for (int j=0;j<SketchOne.Rgroup_1;j++)
-    //    {
-    //        ropeVec[j]->update();
-    //    }
-    if (leap.isFrameNew())
-    {
-        simpleHands = leap.getSimpleHands();
-    }
+    //leap update
+    simpleHands = leap.getSimpleHands();
     
     
     //HANDS CONTROL SKETCH #1
     if (handsSketch_1)
     {
         SketchOne.update(simpleHands);
+    }
+    else if (handsSketch_2)
+    {
+        SketchTwo.update(simpleHands);
     }
     
     //IMPORTANT! - tell ofxLeapMotion that the frame is no longer new.
@@ -106,23 +93,25 @@ void ofApp::draw()
     
     nodeGrid.customDraw(bShowGridLabels,bShowGridXY, bShowGridYZ, bShowGridXZ);
     
-    //////////////////////////////////////////////////////////
-    //PushMatrix (Hands and Ropes)
     ofPushMatrix();
     if (bMirrorImage)
     {
         ofScale(-1,1,1);
     }
     
+    if (handsSketch_1)
+    {
+        SketchOne.draw();
+    }
+    else if (handsSketch_2)
+    {
+        SketchTwo.draw();
+    }
+
     //Draw Hands
     if (debugDraw)
     {
         drawDebugHands();
-    }
-    
-    if (handsSketch_1)
-    {
-        SketchOne.draw();
     }
     
     ofPopMatrix();
@@ -165,6 +154,7 @@ void ofApp::drawDebugHands()
         ofDrawSphere(handPos.x, handPos.y, handPos.z, 5);
         
         ofPoint handNormal = simpleHands[i].handNormal;
+        //cout <<handNormal<<endl;
         ofSetColor(255, 255, 0);
         ofDrawArrow(handPos, handPos + 100*handNormal);
         
@@ -239,35 +229,26 @@ void ofApp::keyPressed(int key)
 {
     switch (key)
     {
-        case '0': //MOUSEFOLLOW
-            MouseFollow = 1;
-            handsSketch_1 = 0;
-            break;
         case '1'://HANDS SKETCH #1
-            MouseFollow = 0;
             handsSketch_1 = 1;
+            handsSketch_2 = 0;
             break;
             
         case '2'://HANDS SKETCH #2
-            MouseFollow = 0;
             handsSketch_1 = 0;
             handsSketch_2 = 1;
             break;
             
         case '3'://HANDS SKETCH #3
-            MouseFollow = 0;
             break;
             
         case '4'://HANDS SKETCH #4
-            MouseFollow = 0;
             break;
             
         case '5'://HANDS SKETCH #5
-            MouseFollow = 0;
             break;
             
         case '6'://HANDS SKETCH #6
-            MouseFollow = 0;
             break;
             
         case '7'://HANDS SKETCH #7
@@ -290,19 +271,13 @@ void ofApp::keyPressed(int key)
                 // reset mapping on new output
                 setLeapMapping();
             }
-            guiRopes->setPosition(ofGetWidth()-210,0);
             box.set(ofGetWidth(), ofGetHeight(), outputZrange);
             break;
         case 'H':
         case 'h':
             bShowHelp = !bShowHelp;
             break;
-        case 'm':
-            for(int j=0;j<SketchOne.Rgroup_1;j++)
-            {
-                SketchOne.ropeVec[j]->ps[10].addForce(ofPoint(0,10000,10000));
-            }
-                
+
         default:
             break;
     }
@@ -314,111 +289,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e)
     string name = e.widget->getName();
     int kind = e.widget->getKind();
     
-    if(name == "X")
-    {
-        ofxUISlider *slider = (ofxUISlider *) e.widget;
-        for (int k = 0; k<SketchOne.Rgroup_1; k++)
-        {
-            SketchOne.ropeVec[k]->ForceX = slider->getScaledValue();
-        }
-    }
-    else if(name == "Y")
-    {
-        ofxUISlider *slider = (ofxUISlider *) e.widget;
-        for (int k = 0; k<SketchOne.Rgroup_1; k++)
-        {
-            SketchOne.ropeVec[k]->ForceY = slider->getScaledValue();
-        }
-    }
-    else if(name == "Z")
-    {
-        ofxUISlider *slider = (ofxUISlider *) e.widget;
-        for (int k = 0; k<SketchOne.Rgroup_1; k++)
-        {
-            SketchOne.ropeVec[k]->ForceZ = slider->getScaledValue();
-        }
-    }
-    else if (name == "Primitives")
-    {
-        ofxUIRadio *radio = (ofxUIRadio *) e.widget;
-        if (radio->getValue() == 0)
-        {
-            for (int k = 0; k<SketchOne.Rgroup_1; k++)
-            {
-                SketchOne.ropeVec[k]->ropeMesh.setMode(OF_PRIMITIVE_POINTS);
-            }
-        }
-        else if (radio->getValue() == 1)
-        {
-            for (int k = 0; k<SketchOne.Rgroup_1; k++)
-            {
-                SketchOne.ropeVec[k]->ropeMesh.setMode(OF_PRIMITIVE_LINE_STRIP);
-            }
-        }
-    }
-    else if (name == "PolyLine-Mesh")
-    {
-        ofxUIRadio *radio = (ofxUIRadio *) e.widget;
-        if (radio->getValue() == 0)
-        {
-            for (int k = 0; k<SketchOne.Rgroup_1; k++) {
-                SketchOne.ropeVec[k]->meshRender = true;
-            }
-        }
-        else if (radio->getValue() == 1)
-        {
-            for (int k = 0; k<SketchOne.Rgroup_1; k++)
-            {
-                SketchOne.ropeVec[k]->meshRender = false;
-            }
-        }
-    }
-    else if (name == "B_smoothing")
-    {
-        ofxUISlider *slider = (ofxUISlider *) e.widget;
-        for (int i=0;i < SketchOne.Rgroup_1; i++)
-        {
-            SketchOne.ropeVec[i]->smoothMoveA = slider->getValue();
-            SketchOne.ropeVec[i]->smoothMoveB = slider->getValue();
-        }
-    }
-    else if (name == "Particle_Mass")
-    {
-        ofxUISlider *slider = (ofxUISlider *) e.widget;
-        for (int i=0;i < SketchOne.Rgroup_1; i++)
-        {
-            for (int k = 1; k<SketchOne.ropeVec[i]->ps.size()-1;k++)
-                SketchOne.ropeVec[i]->ps[k].mass = slider->getValue();
-        }
-    }
-    else if (name == "Particle_Drag")
-    {
-        ofxUISlider *slider = (ofxUISlider *) e.widget;
-        for (int i=0;i < SketchOne.Rgroup_1; i++)
-        {
-            for (int k =1; k<SketchOne.ropeVec[i]->ps.size()-1;k++)
-                SketchOne. ropeVec[i]->ps[k].drag = slider->getValue();
-        }
-    }
-    else if (name == "Spring_k")
-    {
-        ofxUISlider *slider = (ofxUISlider *) e.widget;
-        for (int i = 0;i < SketchOne.Rgroup_1; i++)
-        {
-            for (int k=0; k<SketchOne.ropeVec[i]->sp.size();k++)
-                SketchOne.ropeVec[i]->sp[k].k = slider->getValue();
-        }
-    }
-    else if (name == "Ctrl_Points")
-    {
-        for (int  i=0;i<SketchOne.Rgroup_1;i++)
-        {
-            SketchOne.ropeVec[i]->ropeMesh.clear();
-            SketchOne.ropeVec[i]->CtrlPointsVisible = VisCtrlPoints;
-            SketchOne.ropeVec[i]->meshSetup();
-        }
-    }
-    else if (name == "Debug Draw Hands")
+    if (name == "Debug Draw Hands")
     {
         ofxUIToggle *toggle = (ofxUIToggle *) e.widget;
         debugDraw = toggle->getValue();
@@ -512,14 +383,14 @@ void ofApp::guiEvent(ofxUIEventArgs &e)
         //leapYmin = slider->getValue();
         if (bSetMapping)
         {
-            cout<<"LeapYmin: "<<leapYmin<<"LeapYMax: "<<leapYmax<<endl;
+            //cout<<"LeapYmin: "<<leapYmin<<"LeapYMax: "<<leapYmax<<endl;
             leap.setMappingY(leapYmin, leapYmax, -ofGetHeight()/2,ofGetHeight()/2);
         }
     }
     else if (name == "WorkArea max Y") {
         if (bSetMapping)
         {
-            cout<<"LeapYmin: "<<leapYmin<<"LeapYMax: "<<leapYmax<<endl;
+            //cout<<"LeapYmin: "<<leapYmin<<"LeapYMax: "<<leapYmax<<endl;
             leap.setMappingY(leapYmin, leapYmax, -ofGetHeight()/2, ofGetHeight()/2);
         }
     }
@@ -558,44 +429,6 @@ void ofApp::guiSetup()
     guiLeap->autoSizeToFitWidgets();
     ofAddListener(guiLeap->newGUIEvent,this,&ofApp::guiEvent);//event listener
     
-    guiRopes = new ofxUISuperCanvas("Ropes");
-    guiRopes->setPosition(ofGetWidth()-210,0);
-    guiRopes->addSpacer();
-    guiRopes->addLabel("Forces", OFX_UI_FONT_MEDIUM);
-    guiRopes->addSpacer();
-    guiRopes->addSlider("X", -1.0f, 1.0f, GUIForceX);
-    guiRopes->addSlider("Y", -1.0f, 1.0f, GUIForceY);
-    guiRopes->addSlider("Z", -1.0f, 1.0f, GUIForceZ);
-    guiRopes->addSpacer();
-    vector<string> PrimNames;
-    PrimNames.push_back("Points");
-    PrimNames.push_back("Lines");
-    guiRopes->addRadio("Primitives", PrimNames, 1);
-    vector<string> PolyMesh;
-    PolyMesh.push_back("Mesh");
-    PolyMesh.push_back("PolyLine");
-    guiRopes->addRadio("PolyLine-Mesh", PolyMesh, 1);
-    guiRopes->addSpacer();
-    guiRopes->addSlider("B_smoothing", .001f, 1.0f, bSmooth=0.001f);
-    guiRopes->addSpacer();
-    p_mass = 0.0001f;
-    p_drag = 0.96f;
-    sp_k = 0.2f;
-    guiRopes->addSlider("Particle_Mass", .001f, 10.0f, p_mass=0.001f);
-    guiRopes->addSpacer();
-    guiRopes->addSlider("Particle_Drag", 0.0f, 10.0f, p_drag=0.001f);
-    guiRopes->addSpacer();
-    guiRopes->addSlider("Spring_k", 0.0f, 10.0f, sp_k=0.001f);
-    guiRopes->addSpacer();
-    guiRopes->addToggle("Ctrl_Points", &VisCtrlPoints);
-    guiRopes->addSpacer();
-    guiRopes->addSlider("rotation_accel", 0.0f, 10.0f, &rotationAccel);
-    guiRopes->addSpacer();
-    guiRopes->addSlider("rotation_amp", 0.0f, 5.0f, &rotationAmp);
-    guiRopes->addSpacer();
-    guiRopes->autoSizeToFitWidgets();
-    ofAddListener(guiRopes->newGUIEvent,this,&ofApp::guiEvent);//event listener
-    
     //GUI INIT
     debugDraw = true;
     bMirrorImage = false;
@@ -623,12 +456,13 @@ void ofApp::windowResized(int w, int h)
         // reset mapping on new output
         setLeapMapping();
     }
-    guiRopes->setPosition(ofGetWidth()-210,0);
+    //guiRopes->setPosition(ofGetWidth()-210,0);
     box.set(ofGetWidth(), ofGetHeight(), outputZrange);
 }
 //--------------------------------------------------------------
 void ofApp::exit()
 {
+    ofRemoveListener(guiLeap->newGUIEvent,this,&ofApp::guiEvent);
     // let's close down Leap and kill the controller
     leap.close();
 }

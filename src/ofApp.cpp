@@ -456,7 +456,6 @@ void ofApp::windowResized(int w, int h)
         // reset mapping on new output
         setLeapMapping();
     }
-    //guiRopes->setPosition(ofGetWidth()-210,0);
     box.set(ofGetWidth(), ofGetHeight(), outputZrange);
 }
 //--------------------------------------------------------------

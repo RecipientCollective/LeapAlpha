@@ -41,7 +41,6 @@ public:
     bool MouseFollow = 0;
     
     //GUI
-    ofxUISuperCanvas *guiRopes;
     ofxUISuperCanvas *guiLeap;
     bool bShowGui;
     bool bShowHelp;

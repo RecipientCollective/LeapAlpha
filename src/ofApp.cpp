@@ -113,10 +113,6 @@ void ofApp::draw()
     {
         SketchTwo.draw();
     }
-    else if (handsSketch_4)
-    {
-        SketchFour.draw();
-    }
 
     //Draw Hands
     if (debugDraw)
@@ -149,12 +145,21 @@ void ofApp::draw()
     {
         drawInteractionArea();
     }
+    
+    // 2D MODE
+    if (handsSketch_4)
+    {
+        SketchFour.draw();
+    }
+    
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_NORMALIZE);
+
 }
 //Draw_Debug_Hands
 void ofApp::drawDebugHands()
 {
+    ofPushStyle();
     fingerType fingerTypes[] = {THUMB, INDEX, MIDDLE, RING, PINKY};
     for(int i = 0; i < simpleHands.size(); i++)
     {
@@ -204,6 +209,7 @@ void ofApp::drawDebugHands()
         }
         ofLogNotice() << "FACING HANDS: " << simpleHands[0].handNormal.dot(simpleHands[1].handNormal) << "CENTER: " << center;
     }
+    ofPopStyle();
 }
 
 //Set Leap Re-Mapping
@@ -458,6 +464,7 @@ void ofApp::guiSetup()
     guiLeap->addSlider("WorkArea max Y",  245 , 290, &leapYmax);
     guiLeap->addSpacer();
     guiLeap->addLabel("Press 'H' for Help");
+    guiLeap->addFPS();
     guiLeap->autoSizeToFitWidgets();
     ofAddListener(guiLeap->newGUIEvent,this,&ofApp::guiEvent);//event listener
     

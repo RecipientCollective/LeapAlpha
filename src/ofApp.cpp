@@ -62,7 +62,7 @@ void ofApp::update()
     }
     else if (handsSketch_4)
     {
-        SketchFour.update(simpleHands);
+        SketchFour.update(simpleHands, cam);
     }
     
     //IMPORTANT! - tell ofxLeapMotion that the frame is no longer new.

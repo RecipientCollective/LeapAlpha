@@ -35,10 +35,10 @@ Boid::Boid(int x, int y, ofImage &tex)
 void Boid::update(vector<Boid> &boids)
 {
    
-    if (ofGetFrameNum() % 4 == 0)
-    {
+//    if (ofGetFrameNum() % 4 == 0)
+//    {
         flock(boids);
-    }
+//    }
 	
     vel += acc;   // Update velocity
     vel.x = ofClamp(vel.x, -maxspeed, maxspeed);  // Limit speed

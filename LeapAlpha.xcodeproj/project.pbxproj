@@ -12,6 +12,8 @@
 		4ADB88E2FB52E76A471065DE /* ofxOscParameterSync.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0AED834CE4DEC5260AF302A2 /* ofxOscParameterSync.cpp */; };
 		510CAFE035E576A4E1502D52 /* UdpSocket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E6DEF695B88BA5FAACEAA937 /* UdpSocket.cpp */; };
 		551FD14F1B0F205400667BD9 /* Grid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 551FD14D1B0F205400667BD9 /* Grid.cpp */; };
+		5527A7121B2EF3E1004687E8 /* Boid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5527A70E1B2EF3E1004687E8 /* Boid.cpp */; };
+		5527A7131B2EF3E1004687E8 /* Swarm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5527A7111B2EF3E1004687E8 /* Swarm.cpp */; };
 		55CD87F91B2EED57007A36F1 /* Sketch_4.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 55CD87F71B2EED57007A36F1 /* Sketch_4.cpp */; };
 		5864AD82E20F15536D054EA3 /* ofxOscMessage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DF49D76C45D5DB505A234880 /* ofxOscMessage.cpp */; };
 		62545D179C94265CA1389D4A /* OscOutboundPacketStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63A47AC60FFAFC3BF093EC0F /* OscOutboundPacketStream.cpp */; };
@@ -141,6 +143,10 @@
 		4E95FB446A9C9C6F0DE12D75 /* OscPrintReceivedElements.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = OscPrintReceivedElements.h; path = ../../../addons/ofxOsc/libs/oscpack/src/osc/OscPrintReceivedElements.h; sourceTree = SOURCE_ROOT; };
 		551FD14D1B0F205400667BD9 /* Grid.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Grid.cpp; sourceTree = "<group>"; };
 		551FD14E1B0F205400667BD9 /* Grid.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Grid.h; sourceTree = "<group>"; };
+		5527A70E1B2EF3E1004687E8 /* Boid.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Boid.cpp; sourceTree = "<group>"; };
+		5527A70F1B2EF3E1004687E8 /* Boid.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Boid.h; sourceTree = "<group>"; };
+		5527A7101B2EF3E1004687E8 /* Swarm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Swarm.h; sourceTree = "<group>"; };
+		5527A7111B2EF3E1004687E8 /* Swarm.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Swarm.cpp; sourceTree = "<group>"; };
 		55CD87F71B2EED57007A36F1 /* Sketch_4.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Sketch_4.cpp; sourceTree = "<group>"; };
 		55CD87F81B2EED57007A36F1 /* Sketch_4.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Sketch_4.h; sourceTree = "<group>"; };
 		5928AA323F5C2690B06C837D /* UdpSocketWin.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 30; name = UdpSocketWin.cpp; path = ../../../addons/ofxOsc/libs/oscpack/src/ip/win32/UdpSocketWin.cpp; sourceTree = SOURCE_ROOT; };
@@ -658,6 +664,10 @@
 		E4B69E1C0A3A1BDC003C02F2 /* src */ = {
 			isa = PBXGroup;
 			children = (
+				5527A70E1B2EF3E1004687E8 /* Boid.cpp */,
+				5527A70F1B2EF3E1004687E8 /* Boid.h */,
+				5527A7101B2EF3E1004687E8 /* Swarm.h */,
+				5527A7111B2EF3E1004687E8 /* Swarm.cpp */,
 				D276B2F01B0FA665002D5762 /* Particle.h */,
 				D276B2F11B0FA665002D5762 /* Spring.h */,
 				D276B2ED1B0FA646002D5762 /* Rope.cpp */,
@@ -835,11 +845,13 @@
 				D20D97D21B10BF3000E04CCD /* ofxUIRangeSlider.cpp in Sources */,
 				D276B2EF1B0FA646002D5762 /* Rope.cpp in Sources */,
 				D20D97B81B10BF3000E04CCD /* ofxUI2DGraph.cpp in Sources */,
+				5527A7121B2EF3E1004687E8 /* Boid.cpp in Sources */,
 				55CD87F91B2EED57007A36F1 /* Sketch_4.cpp in Sources */,
 				D20D98261B10BF9600E04CCD /* tinyxmlparser.cpp in Sources */,
 				8F5205AEF8861EF234F0651A /* ofxOscSender.cpp in Sources */,
 				D20D98241B10BF9600E04CCD /* tinyxml.cpp in Sources */,
 				D20D97DC1B10BF3000E04CCD /* ofxUITextArea.cpp in Sources */,
+				5527A7131B2EF3E1004687E8 /* Swarm.cpp in Sources */,
 				D20D97CA1B10BF3000E04CCD /* ofxUILabelButton.cpp in Sources */,
 				D20D97CF1B10BF3000E04CCD /* ofxUIMultiImageToggle.cpp in Sources */,
 				ADE367465D2A8EBAD4C7A8D9 /* IpEndpointName.cpp in Sources */,

@@ -289,7 +289,11 @@ void ofApp::keyPressed(int key)
             {
                 SketchTwo.guiRopes->setVisible(bShowGui);
             }
-            
+            else if (handsSketch_4)
+            {
+                SketchFour.guiSwarm->setVisible(bShowGui);
+            }
+
             break;
         case 'F':
         case 'f':

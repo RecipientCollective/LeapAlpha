@@ -82,6 +82,7 @@ void Sketch_4::SketchSetup()
     startCount = START_COUNT;
     maxDistance = MAX_DISTANCE;
     seekArea = MAXSEEKAREA;
+    minSeekArea = MINSEEKAREA;
     
     avoidZthreshold = 0.0f; // position in z to start avoid
     
@@ -94,7 +95,8 @@ void Sketch_4::SketchSetup()
     guiSwarm->addToggle("MOUSE CONTROL", &bMouseSwarmControl);
     guiSwarm->addToggle("SHOW CONTROL POINTS", &bShowControlPoints);
     guiSwarm->addSlider("AVOID AREA", 1, 1000, &maxDistance);
-    guiSwarm->addSlider("SEEK AREA", 1, 1000, &seekArea);
+    guiSwarm->addSlider("MAX SEEK AREA", 1, 1000, &seekArea);
+    guiSwarm->addSlider("MIN SEEK AREA", 1, 1000, &minSeekArea);
     guiSwarm->addSlider("AVOID Z THRESHOLD", -500, 500, &avoidZthreshold);
     
     guiSwarm->autoSizeToFitWidgets();
@@ -186,7 +188,7 @@ void Sketch_4::update(vector<ofxLeapMotionSimpleHand> LeapHands, ofCamera cam)
         for (int i = 0; i<swarm.swarmSize(); i++)
         {
             ofVec2f dist = swarm.boids[i].loc - seekPoint;
-            if (dist.lengthSquared() < (seekArea*seekArea) )
+            if (dist.lengthSquared() < (seekArea*seekArea) && dist.lengthSquared() > (minSeekArea*minSeekArea))
             {
                 swarm.boids[i].arrive(seekPoint);
             }
@@ -213,8 +215,8 @@ void Sketch_4::draw()
         {
             ofPushStyle();
             ofSetColor(0,255,0);
-            ofCircle(seekPoint,4.0f);
             ofNoFill();
+            ofCircle(seekPoint, minSeekArea);
             ofCircle(seekPoint, seekArea);
             ofPopStyle();
         }

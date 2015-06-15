@@ -19,6 +19,7 @@
 #define START_COUNT 400
 #define MAX_DISTANCE 400.0f
 #define MAXSEEKAREA 400.0f
+#define MINSEEKAREA 50.0f
 #define ERASE_RADIUS 30.0f
 #define HAND_NORMAL_LIMIT 0.8f
 
@@ -53,6 +54,7 @@ public:
     ofPoint seekPoint;
     bool seek;
     float seekArea;
+    float minSeekArea;
     float maxDistance;
     float avoidZthreshold;
     ofVec3f viewPortPoint;

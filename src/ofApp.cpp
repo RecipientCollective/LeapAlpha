@@ -23,6 +23,8 @@ void ofApp::setup()
     SketchOne.SetupListeners();
     SketchTwo.SetupListeners();
     
+    SketchFour.SetupListeners();
+    
 #ifdef DEBUG
     ofSetLogLevel(OF_LOG_NOTICE);
 #else
@@ -57,6 +59,10 @@ void ofApp::update()
     else if (handsSketch_2)
     {
         SketchTwo.update(simpleHands);
+    }
+    else if (handsSketch_4)
+    {
+        SketchFour.update(simpleHands);
     }
     
     //IMPORTANT! - tell ofxLeapMotion that the frame is no longer new.
@@ -106,6 +112,10 @@ void ofApp::draw()
     else if (handsSketch_2)
     {
         SketchTwo.draw();
+    }
+    else if (handsSketch_4)
+    {
+        SketchFour.draw();
     }
 
     //Draw Hands
@@ -232,17 +242,25 @@ void ofApp::keyPressed(int key)
         case '1'://HANDS SKETCH #1
             handsSketch_1 = 1;
             handsSketch_2 = 0;
+            
+            handsSketch_4 = 0;
             break;
             
         case '2'://HANDS SKETCH #2
             handsSketch_1 = 0;
             handsSketch_2 = 1;
+            
+            handsSketch_4 = 0;
             break;
             
         case '3'://HANDS SKETCH #3
             break;
             
         case '4'://HANDS SKETCH #4
+            handsSketch_1 = 0;
+            handsSketch_2 = 0;
+            
+            handsSketch_4 = 1;
             break;
             
         case '5'://HANDS SKETCH #5

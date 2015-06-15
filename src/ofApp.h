@@ -7,6 +7,8 @@
 #include "Sketch_1.h"
 #include "Sketch_2.h"
 
+#include "Sketch_4.h"
+
 class ofApp : public ofBaseApp{
     
 public:
@@ -33,6 +35,7 @@ public:
     
     Sketch_1    SketchOne;
     Sketch_2    SketchTwo;
+    Sketch_4    SketchFour;
     
     //CAMERA
     ofEasyCam cam;

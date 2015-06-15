@@ -262,6 +262,16 @@ void ofApp::keyPressed(int key)
         case 'G':
         case 'g':
             bShowGui = !bShowGui;
+            guiLeap->setVisible(bShowGui);
+            if (handsSketch_1)
+            {
+                SketchOne.guiRopes->setVisible(bShowGui);
+            }
+            else if (handsSketch_2)
+            {
+                SketchTwo.guiRopes->setVisible(bShowGui);
+            }
+            
             break;
         case 'F':
         case 'f':

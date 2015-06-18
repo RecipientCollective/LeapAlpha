@@ -9,6 +9,9 @@
 
 #include "Sketch_4.h"
 
+
+#define GUILEAP_SETTINGS "leapsettings.xml"
+
 class ofApp : public ofBaseApp{
     
 public:

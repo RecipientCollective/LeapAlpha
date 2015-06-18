@@ -122,7 +122,9 @@ void Sketch_4::update(vector<ofxLeapMotionSimpleHand> LeapHands, ofCamera cam)
         {
             seek = true;
             avoid = false;
-            viewPortPoint = cam.worldToScreen(handPos);
+            ofPoint pos = ofPoint(-handPos.x, handPos.y, handPos.z);
+            
+            viewPortPoint = cam.worldToScreen(pos);
             seekPoint.set(viewPortPoint.x, viewPortPoint.y);
         }
         else
@@ -135,7 +137,9 @@ void Sketch_4::update(vector<ofxLeapMotionSimpleHand> LeapHands, ofCamera cam)
             if  (index_tip.z < 0 && index_tip.z <= avoidZthreshold)
             {
                 avoid = true;
-                viewPortPoint = cam.worldToScreen(index_tip);
+                ofPoint pos = ofPoint(-index_tip.x, index_tip.y, index_tip.z);
+            
+                viewPortPoint = cam.worldToScreen(pos);
                 avoidPoint.set(viewPortPoint.x, viewPortPoint.y);
             }
             else
@@ -154,7 +158,8 @@ void Sketch_4::update(vector<ofxLeapMotionSimpleHand> LeapHands, ofCamera cam)
         {
             seek = true;
             ofPoint center = LeapHands[0].handPos.getMiddle(LeapHands[1].handPos);
-            viewPortPoint = cam.worldToScreen(center);
+            ofPoint pos = ofPoint(-center.x, center.y, center.z);
+            viewPortPoint = cam.worldToScreen(pos);
             seekPoint.set(viewPortPoint.x, viewPortPoint.y);
         }
         else

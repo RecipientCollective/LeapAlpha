@@ -146,15 +146,28 @@ void ofApp::draw()
         drawInteractionArea();
     }
     
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_NORMALIZE);
+    
     // 2D MODE
     if (handsSketch_4)
     {
+        ofPushMatrix();
+        ofPushStyle();
+        
+//        if (bMirrorImage)
+//        {
+//            ofScale(1,-1,1);
+//        }
+//        ofEnableAlphaBlending();
         SketchFour.draw();
+//        ofDisableAlphaBlending();
+        
+        ofPopMatrix();
+        ofPopStyle();
+
     }
     
-    glDisable(GL_DEPTH_TEST);
-    glDisable(GL_NORMALIZE);
-
 }
 //Draw_Debug_Hands
 void ofApp::drawDebugHands()
@@ -315,7 +328,14 @@ void ofApp::keyPressed(int key)
         case 'h':
             bShowHelp = !bShowHelp;
             break;
-
+        case 'S':
+        case 's':
+            guiLeap -> saveSettings(GUILEAP_SETTINGS);
+            break;
+        case 'L':
+        case 'l':
+            guiLeap -> loadSettings(GUILEAP_SETTINGS);
+            break;
         default:
             break;
     }
@@ -461,7 +481,7 @@ void ofApp::guiSetup()
     guiLeap->addSlider("WorkArea X range", 0, 460, &leapXrange);
     guiLeap->addSlider("WorkArea Z range", 0, outputZrange/2, &leapZrange);
     guiLeap->addSlider("WorkArea min Y", 10 , 245, &leapYmin);
-    guiLeap->addSlider("WorkArea max Y",  245 , 290, &leapYmax);
+    guiLeap->addSlider("WorkArea max Y",  245 , 400, &leapYmax);
     guiLeap->addSpacer();
     guiLeap->addLabel("Press 'H' for Help");
     guiLeap->addFPS();

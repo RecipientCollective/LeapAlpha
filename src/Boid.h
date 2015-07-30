@@ -5,7 +5,7 @@
 
 #define MAX_BOID_SPEED 5.0f
 #define MAX_BOID_FORCE 0.5f
-#define BOID_RADIUS 3.0f
+#define BOID_RADIUS 10.0f
 #define BOID_SEPARATION 50.0f
 #define SLOW_DOWN_DISTANCE 150.0f
 #define BOID_SEP_WEIGHT 1.2f

@@ -104,7 +104,8 @@ void Sketch_4::SketchSetup()
     
     texture.loadImage(FISH_IMAGE);
     swarm.clear();
-    swarm.setup(startCount, texture);
+//    swarm.setup(startCount, texture);
+            swarm.setup(startCount);
 
 }
 
@@ -122,7 +123,7 @@ void Sketch_4::update(vector<ofxLeapMotionSimpleHand> LeapHands, ofCamera cam)
         {
             seek = true;
             avoid = false;
-            ofPoint pos = ofPoint(-handPos.x, handPos.y, handPos.z);
+            ofPoint pos = ofPoint(-handPos.x, handPos.y+120.0f, handPos.z);
             
             viewPortPoint = cam.worldToScreen(pos);
             seekPoint.set(viewPortPoint.x, viewPortPoint.y);
@@ -134,18 +135,18 @@ void Sketch_4::update(vector<ofxLeapMotionSimpleHand> LeapHands, ofCamera cam)
             // get hand index fingertip for swarm avoid
             ofPoint index_tip = LeapHands[0].fingers[ fingerTypes[1] ].tip;
             
-            if  (index_tip.z < 0 && index_tip.z <= avoidZthreshold)
-            {
+//            if  (index_tip.z < 0 && index_tip.z <= avoidZthreshold)
+//            {
                 avoid = true;
                 ofPoint pos = ofPoint(-index_tip.x, index_tip.y, index_tip.z);
             
                 viewPortPoint = cam.worldToScreen(pos);
                 avoidPoint.set(viewPortPoint.x, viewPortPoint.y);
-            }
-            else
-            {
-                avoid = false;
-            }
+//            }
+//            else
+//            {
+//                avoid = false;
+//            }
         }
     }
     // 2 HANDS
@@ -296,6 +297,7 @@ void Sketch_4::guiEvent(ofxUIEventArgs &e)
     if (name == "REINIT SWARM")
     {
         swarm.clear();
-        swarm.setup(startCount, texture);
+//        swarm.setup(startCount, texture);
+        swarm.setup(startCount);
     }
 }
